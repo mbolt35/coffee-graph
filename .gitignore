@@ -18,9 +18,9 @@
 *.tar
 *.zip
 
-# Maven Generated #
-###################
-target/
+# Backup Files #
+################
+*.bak
 
 # OS generated files #
 ######################
