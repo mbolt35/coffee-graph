@@ -77,7 +77,7 @@ In May 2012, I started my first CoffeeScript project, and noticed I was focusing
 
 I needed these external concerns to go away, so I started to build a maven plugin that did some quick find/replace in the source files to order them. The quick and dirty solution didn't hold up too long, and it was clear I needed a much more intelligent approach for finding dependencies between files. And what better way to learn a language than to dive right into the compiler. 
 
-The original find/replace algorithm turned into an attempt to reproduce the CoffeeScript grammar in `javacc`. I had some success, but ultimately, my grammar was only 90% accurate when parsing the CoffeeScript unit tests. After this approach, I looked into[JCoffeeScript](https://github.com/yeungda/jcoffeescript), which executes the JS CoffeeScript compiler using [Rhino](http://www.mozilla.org/rhino/). Obviously, this was a much more maintainable approach, it was accurate, and the rest is history.
+The original find/replace algorithm turned into an attempt to reproduce the CoffeeScript grammar in `javacc`. I had some success, but ultimately, my grammar was only 90% accurate when parsing the CoffeeScript unit tests. After this approach, I looked into [JCoffeeScript](https://github.com/yeungda/jcoffeescript), which executes the JS CoffeeScript compiler using [Rhino](http://www.mozilla.org/rhino/). Obviously, this was a much more maintainable approach, and the rest is history.
 
 
 ## About Me
