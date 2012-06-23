@@ -95,6 +95,5 @@
             <url>http://reflections.googlecode.com/svn/repo</url>
         </pluginRepository>
     </pluginRepositories>
-    </profiles>
 
 </project>
