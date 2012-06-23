@@ -32,3 +32,7 @@
 Icon?
 ehthumbs.db
 Thumbs.db
+
+# Project Files #
+#################
+.idea/
