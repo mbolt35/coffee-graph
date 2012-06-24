@@ -22,35 +22,13 @@
 //  THE SOFTWARE.
 // 
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-//
-//  Coffee-Graph
-//  Copyright(C) 2012 Matt Bolt
-// 
-//  Permission is hereby granted, free of charge, to any person obtaining a 
-//  copy of this software and associated documentation files (the "Software"), 
-//  to deal in the Software without restriction, including without limitation 
-//  the rights to use, copy, modify, merge, publish, distribute, sublicense, 
-//  and/or sell copies of the Software, and to permit persons to whom the  
-//  Software is furnished to do so, subject to the following conditions:
-// 
-//  The above copyright notice and this permission notice shall be included in 
-//  all copies or substantial portions of the Software.
-// 
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
-//  THE SOFTWARE.
-// 
-////////////////////////////////////////////////////////////////////////////////
 
 package bolt.web.coffee.io;
 
 import bolt.web.coffee.types.CoffeeTokenType;
 import bolt.web.coffee.types.CoffeeType;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -60,11 +38,19 @@ import bolt.web.coffee.types.CoffeeType;
  */
 public class CoffeeToken {
 
+    private static AtomicInteger idCount = new AtomicInteger();
+
+    private final int id;
     private final CoffeeType type;
     private final String value;
     private final int lineNumber;
 
+    public CoffeeToken(CoffeeType type, String value) {
+        this(type, value, 0);
+    }
+
     public CoffeeToken(CoffeeType type, String value, int lineNumber) {
+        this.id = idCount.incrementAndGet();
         this.type = type;
         this.value = value;
         this.lineNumber = lineNumber;
@@ -77,6 +63,7 @@ public class CoffeeToken {
 
         CoffeeToken that = (CoffeeToken) o;
 
+        if (id != that.id) return false;
         if (lineNumber != that.lineNumber) return false;
         if (!type.equals(that.type)) return false;
         if (!value.equals(that.value)) return false;
@@ -86,7 +73,8 @@ public class CoffeeToken {
 
     @Override
     public int hashCode() {
-        int result = type.hashCode();
+        int result = id;
+        result = 31 * result + type.hashCode();
         result = 31 * result + value.hashCode();
         result = 31 * result + lineNumber;
         return result;

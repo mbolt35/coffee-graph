@@ -22,30 +22,6 @@
 //  THE SOFTWARE.
 // 
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-//
-//  Coffee-Graph
-//  Copyright(C) 2012 Matt Bolt
-// 
-//  Permission is hereby granted, free of charge, to any person obtaining a 
-//  copy of this software and associated documentation files (the "Software"), 
-//  to deal in the Software without restriction, including without limitation 
-//  the rights to use, copy, modify, merge, publish, distribute, sublicense, 
-//  and/or sell copies of the Software, and to permit persons to whom the  
-//  Software is furnished to do so, subject to the following conditions:
-// 
-//  The above copyright notice and this permission notice shall be included in 
-//  all copies or substantial portions of the Software.
-// 
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
-//  THE SOFTWARE.
-// 
-////////////////////////////////////////////////////////////////////////////////
 
 package bolt.web.coffee.dependency;
 
@@ -57,7 +33,10 @@ import bolt.web.coffee.types.CoffeeSymbolType;
 import bolt.web.coffee.types.CoffeeTokenType;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This class is used to manage all of the dependencies parsed from the coffee-script source files. The
@@ -66,8 +45,9 @@ import java.util.*;
  * identifier references stemming from our current source identifier. We refer to these as {@code OutgoingReferences},
  * or edges from our current identifier to another identifier.
  *
- * <p>Due to the fact that the target identifier may not have been parsed yet, we create a record of this instance, such
- * that we can resolve it during our second pass. </p>
+ * <p>
+ * Due to the fact that the target identifier may not have been parsed yet, we create a record of this instance, such
+ * that we can resolve it during our second pass.
  *
  * @author Matt Bolt
  */
@@ -99,7 +79,7 @@ public class CoffeeScriptDependencies {
 
             // Collect all of the global identifiers, determine any potential identifiers referenced
             for (CoffeeToken idToken : idTokens) {
-                CoffeeIdentifier identifier = new CoffeeIdentifier(idToken.getValue(), file);
+                CoffeeIdentifier identifier = new CoffeeIdentifier(idToken.getValue(), file, scope.getDepth());
 
                 if (isGlobalScoped(scope, idToken)) {
                     dependencies.add(identifier);
@@ -143,53 +123,79 @@ public class CoffeeScriptDependencies {
      * @return A list of the identifier references found in the existing and inner scopes.
      */
     private List<DependencyReference<CoffeeIdentifier>> findReferencesIn(CoffeeScope scope) {
-        // TODO: We need to use a better key for resolving references -- the current key is just the identifier's value,
-        // TODO: which is the name. The key *should* contain a reference to the scope it exists in such that identifiers
-        // TODO: defined in the outer scope don't resolve to a potential global scoped identifier.
+        return findReferencesIn(scope, new HashSet<String>());
+    }
 
-        /* Example */
-        /* The following would create an edge between Foo.coffee and Bar.coffee even though they're autonomous */
-        /*
-            <File: Foo.coffee>
-            class Foo
-              a: "a"
-              constructor: ->
-
-            <File: Bar.coffee>
-            aMethod = ->
-              anotherInnerMethod = ->
-                Foo = "someStringValue"
-
-                alert Foo
-
-        */
-
+    /**
+     * Recursively search each inner-scope for references to identifiers outside of the current scope.
+     *
+     * @param scope The {@code CoffeeScope} instance to search.
+     *
+     * @param overrides If any of the global identifiers are overridden in a different scope, we need to ensure that any
+     * identifiers within that scope do not create a dependency with the global identifier. We collect "overrides" as we
+     * recurse and pass them onto the next inner scope reference search. It's important to note that <strong>This
+     * Set instance is *not* modified.</strong>
+     *
+     * @return A list of the identifier references found in the existing and inner scopes.
+     */
+    private List<DependencyReference<CoffeeIdentifier>> findReferencesIn(CoffeeScope scope, Set<String> overrides) {
         List<DependencyReference<CoffeeIdentifier>> references = new ArrayList<DependencyReference<CoffeeIdentifier>>();
+        Set<String> localOverrides = new HashSet<String>(overrides);
 
-        // Search the current scope for any identifier references, then validate the *type* of reference
-        List<CoffeeToken> localTokens = scope.tokensFor(CoffeeTokenType.Identifier);
-        for (CoffeeToken token : localTokens) {
+        // Check local scope
+        for (CoffeeToken token : scope.tokensFor(CoffeeTokenType.Identifier)) {
+            // Check the current scope override identifiers to see if this token fails
+            if (localOverrides.contains(token.getValue())) {
+                continue;
+            }
+
+            // Check for a global identifier with the same name -- ensure that this identifier is to be ignored
+            // throughout the scope of this token.
+            if (dependencies.canResolve(token.getValue()) && isAssigned(scope, token)) {
+                localOverrides.add(token.getValue());
+                continue;
+            }
+
+            // If we determine that the identifier reference is legitimate, add a dependency reference
             if (isValidReference(scope, token)) {
                 references.add(reference.to(token.getValue()));
             }
+
         }
 
         // Recursively search each inner scope
         for (CoffeeScope innerScope : scope.getScopes()) {
             List<CoffeeToken> tokens = innerScope.tokensFor(CoffeeTokenType.Identifier);
+            Set<String> innerOverrides = new HashSet<String>();
 
             for (CoffeeToken token : tokens) {
+                // Check the current scope override identifiers to see if this token fails
+                if (localOverrides.contains(token.getValue()) || innerOverrides.contains(token.getValue())) {
+                    continue;
+                }
+
+                //System.out.println("Scoped - Token: " + token);
+
+                // Check for a global identifier with the same name -- ensure that this identifier is to be ignored
+                // throughout the scope of this token.
+                if (dependencies.canResolve(token.getValue()) && isAssigned(innerScope, token)) {
+                    innerOverrides.add(token.getValue());
+                    continue;
+                }
+
+                // If we determine that the identifier reference is legitimate, add a dependency reference
                 if (isValidReference(innerScope, token)) {
                     references.add(reference.to(token.getValue()));
                 }
             }
 
-            references.addAll( findReferencesIn(innerScope) );
+            // Pass existing overrides with the inner overrides found in this scope, and recurse
+            innerOverrides.addAll(localOverrides);
+            references.addAll( findReferencesIn(innerScope, innerOverrides) );
         }
 
         return references;
     }
-
 
     // This will resolve anything that looks like it may reference a global dependency, which is ok because
     // it will not show up in the global list of identifiers. They will then be ignored.
@@ -197,11 +203,35 @@ public class CoffeeScriptDependencies {
         CoffeeToken after = scope.after(token);
         CoffeeToken before = scope.before(token);
 
-        if (null == before && null != after) {
-            return isDot(after);
+        return isFieldReference(before, after) || isFunctionReference(scope, after) || isClassReference(before);
+    }
+
+    private boolean isFieldReference(CoffeeToken before, CoffeeToken after) {
+        return null == before && null != after && isDot(after);
+    }
+
+    private boolean isClassReference(CoffeeToken before) {
+        return null != before && (isNew(before) || isExtends(before));
+    }
+
+    private boolean isFunctionReference(CoffeeScope scope, CoffeeToken after) {
+        if (null == after || !isCallStart(after)) {
+            return false;
         }
 
-        return before != null && (isNew(before) || isExtends(before));
+        CoffeeToken next = scope.after(after);
+        while (null != next) {
+            if (isCallEnd(next)) {
+                return true;
+            }
+            next = scope.after(next);
+        }
+
+        return false;
+    }
+
+    private boolean isAssigned(CoffeeScope scope, CoffeeToken token) {
+        return isAssignment(scope.after(token));
     }
 
     private boolean isGlobalScoped(CoffeeScope scope, CoffeeToken token) {
@@ -222,6 +252,11 @@ public class CoffeeScriptDependencies {
         return null != token && CoffeeTokenType.Extends == token.getType();
     }
 
+    private boolean isAssignment(CoffeeToken token) {
+        return null != token
+            && (CoffeeSymbolType.Assignment == token.getType() || CoffeeTokenType.CompoundAssign == token.getType());
+    }
+
     private boolean isThis(CoffeeToken token) {
         return null != token && CoffeeTokenType.This == token.getType();
     }
@@ -232,5 +267,13 @@ public class CoffeeScriptDependencies {
 
     private boolean isDot(CoffeeToken token) {
         return null != token && CoffeeSymbolType.Dot == token.getType();
+    }
+
+    private boolean isCallStart(CoffeeToken token) {
+        return null != token && CoffeeTokenType.CallStart == token.getType();
+    }
+
+    private boolean isCallEnd(CoffeeToken token) {
+        return null != token && CoffeeTokenType.CallEnd == token.getType();
     }
 }

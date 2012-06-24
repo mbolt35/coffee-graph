@@ -22,30 +22,6 @@
 //  THE SOFTWARE.
 // 
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-//
-//  Coffee-Graph
-//  Copyright(C) 2012 Matt Bolt
-// 
-//  Permission is hereby granted, free of charge, to any person obtaining a 
-//  copy of this software and associated documentation files (the "Software"), 
-//  to deal in the Software without restriction, including without limitation 
-//  the rights to use, copy, modify, merge, publish, distribute, sublicense, 
-//  and/or sell copies of the Software, and to permit persons to whom the  
-//  Software is furnished to do so, subject to the following conditions:
-// 
-//  The above copyright notice and this permission notice shall be included in 
-//  all copies or substantial portions of the Software.
-// 
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
-//  THE SOFTWARE.
-// 
-////////////////////////////////////////////////////////////////////////////////
 
 package bolt.web.coffee.io;
 
@@ -59,19 +35,20 @@ import java.util.List;
  * organized into a tree structure organized by {@code File} instances. Each file can be matched back to a specific
  * {@code CoffeeScope}, where it can be evaluated by a 2nd pass to generate a basic dependency graph.
  *
+ * <p>
+ * Note that the {@link CoffeeTree} class took more of the parsing responsibility than I meant it to. This is a bit of
+ * a design flaw, but isn't hurting anything as of yet. This will change in a future release to something more reliable.
+ *
  * @author Matt Bolt
  */
 public class CoffeeScriptMinParser implements Parser {
 
-    private final Lexer lexer;
+    public CoffeeScriptMinParser() {
 
-    public CoffeeScriptMinParser(Lexer lexer) {
-        this.lexer = lexer;
     }
 
-
     @Override
-    public CoffeeTree parse(List<File> files) {
+    public CoffeeTree parse(Lexer lexer, List<File> files) {
         CoffeeTree tree = new CoffeeTree();
 
         for (File file : files) {
