@@ -48,12 +48,20 @@ public class CoffeeScriptLexer implements Lexer {
         coffeeScript = new CoffeeScript();
     }
 
-    @SuppressWarnings({ "unchecked" })
+    @Override
     public List<CoffeeToken> tokenize(File coffeeFile) {
+        return tokenize(coffeeScript.tokenize(coffeeFile));
+    }
+
+    @Override
+    public List<CoffeeToken> tokenize(String coffeeString) {
+        return tokenize(coffeeScript.tokenize(coffeeString));
+    }
+
+    @SuppressWarnings({"unchecked"})
+    private List<CoffeeToken> tokenize(NativeArray nativeTokens) {
         List<CoffeeToken> tokens = new ArrayList<CoffeeToken>();
 
-        // use the rhino adapter to pull a native array of tokens, and generate java objects
-        NativeArray nativeTokens = coffeeScript.tokenize(coffeeFile);
         ArrayList<NativeArray> list = new ArrayList<NativeArray>(nativeTokens);
         for (NativeArray token : list) {
             tokens.add( tokenFrom(new ArrayList<Object>(token)) );

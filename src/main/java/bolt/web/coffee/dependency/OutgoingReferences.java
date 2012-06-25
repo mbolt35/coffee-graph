@@ -20,7 +20,7 @@
 package bolt.web.coffee.dependency;
 
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 /**
  * This class tracks a single {@code T} instance with a {@code List} of {@link DependencyReference} instances that
@@ -31,9 +31,9 @@ import java.util.List;
 public class OutgoingReferences<T extends NamedDependency> {
 
     private final T item;
-    private final List<DependencyReference<T>> outgoing;
+    private final Set<DependencyReference<T>> outgoing;
 
-    public OutgoingReferences(T item, List<DependencyReference<T>> outgoing) {
+    public OutgoingReferences(T item, Set<DependencyReference<T>> outgoing) {
         this.item = item;
         this.outgoing = outgoing;
     }
@@ -42,7 +42,7 @@ public class OutgoingReferences<T extends NamedDependency> {
         return item;
     }
 
-    public List<DependencyReference<T>> getOutgoing() {
-        return Collections.unmodifiableList(outgoing);
+    public Set<DependencyReference<T>> getOutgoing() {
+        return Collections.unmodifiableSet(outgoing);
     }
 }

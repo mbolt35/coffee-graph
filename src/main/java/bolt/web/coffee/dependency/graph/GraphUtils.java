@@ -25,10 +25,9 @@
 
 package bolt.web.coffee.dependency.graph;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import bolt.web.coffee.dependency.NamedDependency;
+
+import java.util.*;
 
 
 /**
@@ -76,6 +75,45 @@ public final class GraphUtils {
     }
 
     /**
+     * This method prints a sorted list of the dependency graph and each outgoing dependency.
+     *
+     * @param dependencyGraph The dependency graph to print.
+     *
+     * @param <T>
+     * @throws CyclicDependencyException
+     */
+    public static <T extends NamedDependency> void printDependencies(DependencyGraph<T> dependencyGraph)
+        throws CyclicDependencyException
+    {
+        DependencyGraph<T> graph = dependencyGraph.copy();
+        List<T> ordered = topologicalSort(dependencyGraph);
+        Set<String> alreadyPrinted = new HashSet<String>();
+
+        for (T root : ordered) {
+            if (!alreadyPrinted.contains(root.getName())) {
+                alreadyPrinted.add(root.getName());
+                printOutgoing(root, graph, 0);
+            }
+        }
+    }
+
+    // Recursive dependency tree printer
+    private static <T extends NamedDependency> void printOutgoing(T leaf, DependencyGraph<T> graph, int depth) {
+        System.out.println(spacingFor(depth) + "[" + leaf.getName() + "]");
+
+        Set<T> outgoingNodes = graph.outgoingFor(leaf);
+
+        for (T outgoing : outgoingNodes) {
+            if (outgoing.equals(leaf)) {
+                continue;
+            }
+
+            //graph.remove(leaf, outgoing);
+            printOutgoing(outgoing, graph, depth + 1);
+        }
+    }
+
+    /**
      * This helper method gets the first elements of the set, removes it, and returns it.
      *
      * @param set The set to shift the first element found off the set.
@@ -91,5 +129,19 @@ public final class GraphUtils {
         }
 
         return null;
+    }
+
+    private static String spacingFor(int depth) {
+        if (depth <= 0) {
+            return "";
+        }
+
+        StringBuilder builder = new StringBuilder("");
+        for (int i = 0; i < depth-1; ++i) {
+            builder.append(" |  ");
+        }
+        builder.append(" +- ");
+
+        return builder.toString();
     }
 }

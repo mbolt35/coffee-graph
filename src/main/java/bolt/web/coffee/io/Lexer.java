@@ -43,4 +43,13 @@ public interface Lexer {
      * @return A {@code List} of {@code CoffeeToken} instances
      */
     List<CoffeeToken> tokenize(File coffeeFile);
+
+    /**
+     * This method takes a {@code String} as input and outputs a stream of {@code CoffeeToken} instances.
+     *
+     * @param coffeeString The {@code String} containing coffee-script to tokenize.
+     *
+     * @return A {@code List} of {@code CoffeeToken} instances
+     */
+    List<CoffeeToken> tokenize(String coffeeString);
 }

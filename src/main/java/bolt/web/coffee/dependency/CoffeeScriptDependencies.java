@@ -100,6 +100,7 @@ public class CoffeeScriptDependencies {
 
             for (DependencyReference<CoffeeIdentifier> idReference : references.getOutgoing()) {
                 CoffeeIdentifier resolvedReference = idReference.get();
+                //System.out.println("Parent: " + parentIdentifier.getName() + ", Reference: " + idReference.toString());
                 if (null == resolvedReference) {
                     continue;
                 }
@@ -122,7 +123,7 @@ public class CoffeeScriptDependencies {
      *
      * @return A list of the identifier references found in the existing and inner scopes.
      */
-    private List<DependencyReference<CoffeeIdentifier>> findReferencesIn(CoffeeScope scope) {
+    private Set<DependencyReference<CoffeeIdentifier>> findReferencesIn(CoffeeScope scope) {
         return findReferencesIn(scope, new HashSet<String>());
     }
 
@@ -138,8 +139,8 @@ public class CoffeeScriptDependencies {
      *
      * @return A list of the identifier references found in the existing and inner scopes.
      */
-    private List<DependencyReference<CoffeeIdentifier>> findReferencesIn(CoffeeScope scope, Set<String> overrides) {
-        List<DependencyReference<CoffeeIdentifier>> references = new ArrayList<DependencyReference<CoffeeIdentifier>>();
+    private Set<DependencyReference<CoffeeIdentifier>> findReferencesIn(CoffeeScope scope, Set<String> overrides) {
+        Set<DependencyReference<CoffeeIdentifier>> references = new HashSet<DependencyReference<CoffeeIdentifier>>();
         Set<String> localOverrides = new HashSet<String>(overrides);
 
         // Check local scope
@@ -160,7 +161,6 @@ public class CoffeeScriptDependencies {
             if (isValidReference(scope, token)) {
                 references.add(reference.to(token.getValue()));
             }
-
         }
 
         // Recursively search each inner scope
@@ -173,8 +173,6 @@ public class CoffeeScriptDependencies {
                 if (localOverrides.contains(token.getValue()) || innerOverrides.contains(token.getValue())) {
                     continue;
                 }
-
-                //System.out.println("Scoped - Token: " + token);
 
                 // Check for a global identifier with the same name -- ensure that this identifier is to be ignored
                 // throughout the scope of this token.
@@ -207,7 +205,9 @@ public class CoffeeScriptDependencies {
     }
 
     private boolean isFieldReference(CoffeeToken before, CoffeeToken after) {
-        return null == before && null != after && isDot(after);
+        boolean isDotAfter = null != after && isDot(after);
+
+        return isDotAfter && (null == before || !isDot(before));
     }
 
     private boolean isClassReference(CoffeeToken before) {

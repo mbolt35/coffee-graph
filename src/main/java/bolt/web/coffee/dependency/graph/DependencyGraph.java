@@ -122,8 +122,8 @@ public class DependencyGraph<T> {
     public DependencyGraph<T> copy() {
         return new DependencyGraph<T>(
             new HashSet<T>(nodes),
-            new HashMap<T, Set<T>>(outgoing),
-            new HashMap<T, Set<T>>(incoming),
+            copyMap(outgoing),
+            copyMap(incoming),
             new HashSet<Edge<T>>(edges));
     }
 
@@ -135,6 +135,16 @@ public class DependencyGraph<T> {
 
     public Set<Edge<T>> getEdges() {
         return Collections.unmodifiableSet(edges);
+    }
+
+    private static <T> Map<T, Set<T>> copyMap(Map<T, Set<T>> source) {
+        Map<T, Set<T>> result = new HashMap<T, Set<T>>();
+
+        for (T key : source.keySet()) {
+            result.put(key, new HashSet<T>(source.get(key)));
+        }
+
+        return result;
     }
 
 }
