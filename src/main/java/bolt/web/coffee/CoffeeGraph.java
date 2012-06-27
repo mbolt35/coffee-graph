@@ -50,8 +50,11 @@ public class CoffeeGraph implements Runnable {
 
     public static void main(String[] arguments) {
         CoffeeGraphCommand command = new CoffeeGraphCommand();
+
         JCommander commander = new JCommander(command);
+        commander.setProgramName("CoffeeGraph");
         commander.addConverterFactory(new FileConverterFactory());
+
         try {
             commander.parse(arguments);
         }
