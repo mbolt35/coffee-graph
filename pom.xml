@@ -63,7 +63,8 @@
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                     <outputDirectory>${basedir}/bin</outputDirectory>
-                    <finalName>coffee-graph.jar</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <finalName>coffee-graph</finalName>
                 </configuration>
                 <executions>
                     <execution>
