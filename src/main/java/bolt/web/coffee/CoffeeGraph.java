@@ -59,7 +59,10 @@ public class CoffeeGraph implements Runnable {
             commander.usage();
         }
 
-        System.out.println(command);
+        if (command.help) {
+            commander.usage();
+            return;
+        }
 
         Thread thread = new Thread(new CoffeeGraph(command));
         thread.start();

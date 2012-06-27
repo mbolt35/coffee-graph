@@ -56,6 +56,9 @@ public final class CoffeeGraphCommand {
     @Parameter(names = {"--output, -o" }, description = "The file to output the dependency graph to.")
     public File outputFile = new File("lib/coffee-graph.js");
 
+    @Parameter(names = {"--help", "-h"}, description = "Show the coffee-graph command line usage.")
+    public boolean help = false;
+
     public CoffeeGraphCommand() {
 
     }
