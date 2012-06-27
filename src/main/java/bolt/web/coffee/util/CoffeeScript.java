@@ -53,6 +53,7 @@ public class CoffeeScript {
     private static final String COMPILE = "CoffeeScript.compile(coffeeFile, { bare: true });";
     private static final String TOKENIZE = "CoffeeScript.tokens(coffeeFile, { bare: true });";
     private static final String PARSE = "CoffeeScript.nodes(coffeeFile, { bare: true });";
+    private static final String VERSION = "CoffeeScript.VERSION";
 
     private static final String DEBUG = "debug()";
 
@@ -155,7 +156,6 @@ public class CoffeeScript {
         } finally {
             Context.exit();
         }
-
     }
 
     public NativeObject parse(File coffeeFile) {
@@ -187,7 +187,6 @@ public class CoffeeScript {
             Context.exit();
         }
     }
-
     private void trace(Object object) {
         trace(object, "");
     }
@@ -224,5 +223,22 @@ public class CoffeeScript {
             || object instanceof Float
             || object instanceof Double
             || object instanceof Boolean;
+    }
+
+    /**
+     * This method returns the current version of the CoffeeScript compiler used.
+     *
+     * @return A {@code String} representation of the CoffeeScript version.
+     */
+    public String getVersion() {
+        Context context = Context.enter();
+        Scriptable parseScope = context.newObject(javascript);
+        parseScope.setParentScope(javascript);
+
+        try {
+            return (String) context.evaluateString(parseScope, VERSION, "CoffeeScript", 0, null);
+        } finally {
+            Context.exit();
+        }
     }
 }

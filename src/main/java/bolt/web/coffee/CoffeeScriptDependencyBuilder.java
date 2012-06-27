@@ -93,7 +93,16 @@ public class CoffeeScriptDependencyBuilder {
         DependencyGraph<CoffeeIdentifier> graph = dependencies.generateGraph(tree);
 
         // 4. Export
-        coffeeExporter.export(graph);
+        try {
+            coffeeExporter.export(graph);
+        }
+        catch (RuntimeException e) {
+            if (e.getCause() instanceof CyclicDependencyException) {
+                throw (CyclicDependencyException) e.getCause();
+            } else {
+                throw e;
+            }
+        }
     }
 
     private <T> void check(T instance, String name, String methodName) throws RequiredBuilderComponentException {

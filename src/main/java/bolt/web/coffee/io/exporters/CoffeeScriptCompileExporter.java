@@ -91,6 +91,8 @@ public class CoffeeScriptCompileExporter extends AbstractExporter {
         try {
             out = new BufferedWriter(new FileWriter(outputFile));
 
+            // Write CoffeeScript version used
+            out.write("// Compiled with CoffeeScript v" + coffeeScript.getVersion() + "\n\n");
             for (CoffeeIdentifier identifier : identifiers) {
                 File coffeeSource = identifier.getFile();
                 System.out.println("Compiling: " + coffeeSource.getName());
@@ -102,7 +104,6 @@ public class CoffeeScriptCompileExporter extends AbstractExporter {
             e.printStackTrace();
         } finally {
             try {
-                out.flush();
                 out.close();
             } catch (IOException e) {
                 e.printStackTrace();

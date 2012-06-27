@@ -68,7 +68,11 @@ public class ChainedExporter implements Exporter {
                 if (null == throwables) {
                     throwables = new ArrayList<Throwable>();
                 }
-                throwables.add(e.getCause());
+                if (null != e.getCause()) {
+                    throwables.add(e.getCause());
+                } else {
+                    throwables.add(e);
+                }
             }
         }
 
