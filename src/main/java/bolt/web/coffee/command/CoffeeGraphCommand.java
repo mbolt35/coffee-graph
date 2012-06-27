@@ -53,7 +53,7 @@ public final class CoffeeGraphCommand {
     @Parameter(names = {"--compile", "-c"}, description = "Performs an ordered file join and compilation to CoffeeScript")
     public boolean compile = false;
 
-    @Parameter(names = {"--output, -o" }, description = "The file to output the dependency graph to.")
+    @Parameter(names = {"-o" }, description = "The file to output the dependency graph to.")
     public File outputFile = new File("lib/coffee-graph.js");
 
     @Parameter(names = {"--help", "-h"}, description = "Show the coffee-graph command line usage.")
