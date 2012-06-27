@@ -25,15 +25,96 @@
 
 package bolt.web.coffee;
 
+import bolt.web.coffee.command.CoffeeGraphCommand;
+import bolt.web.coffee.command.FileConverterFactory;
+import bolt.web.coffee.dependency.graph.CyclicDependencyException;
+import bolt.web.coffee.exceptions.ChainedExportException;
+import bolt.web.coffee.exceptions.NoValidCoffeeFilesException;
+import bolt.web.coffee.exceptions.RequiredBuilderComponentException;
+import bolt.web.coffee.io.CoffeeScriptLexer;
+import bolt.web.coffee.io.CoffeeScriptMinParser;
+import bolt.web.coffee.io.Exporter;
+import bolt.web.coffee.io.exporters.ChainedExporter;
+import bolt.web.coffee.io.exporters.CoffeeScriptCompileExporter;
+import bolt.web.coffee.io.exporters.DependencyTreeExporter;
+import bolt.web.coffee.io.exporters.ListFilesExporter;
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
+
 /**
  * This is the main class for the coffee-graph project.
  * 
  * @author Matt Bolt
  */
-public class CoffeeGraph {
-
+public class CoffeeGraph implements Runnable {
 
     public static void main(String[] arguments) {
+        CoffeeGraphCommand command = new CoffeeGraphCommand();
+        JCommander commander = new JCommander(command);
+        commander.addConverterFactory(new FileConverterFactory());
+        try {
+            commander.parse(arguments);
+        }
+        catch (ParameterException e) {
+            commander.usage();
+        }
 
+        System.out.println(command);
+
+        Thread thread = new Thread(new CoffeeGraph(command));
+        thread.start();
+    }
+
+    private final CoffeeGraphCommand command;
+
+    public CoffeeGraph(CoffeeGraphCommand command) {
+        this.command = command;
+    }
+
+    @Override
+    public void run() {
+        try {
+            new CoffeeScriptDependencyBuilder()
+                .withTokensFrom(new CoffeeScriptLexer())
+                .parsedWith(new CoffeeScriptMinParser())
+                .exportedBy(getExporter())
+                .build(command.files);
+        }
+        catch (RequiredBuilderComponentException e) {
+            e.printStackTrace();
+        }
+        catch (NoValidCoffeeFilesException e) {
+            System.out.println(e.getMessage());
+        }
+        catch (ChainedExportException e) {
+            for (Throwable throwable : e.getExceptions()) {
+                System.out.println("Error: " + throwable.getMessage());
+            }
+        }
+        catch (CyclicDependencyException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Exporter getExporter() {
+        ChainedExporter exporter = new ChainedExporter();
+
+        if (command.print) {
+            exporter.addExporter(new ListFilesExporter(false));
+        }
+
+        if (command.println) {
+            exporter.addExporter(new ListFilesExporter(true));
+        }
+
+        if (command.tree) {
+            exporter.addExporter(new DependencyTreeExporter());
+        }
+
+        if (command.compile) {
+            exporter.addExporter(new CoffeeScriptCompileExporter(command.outputFile));
+        }
+
+        return exporter;
     }
 }

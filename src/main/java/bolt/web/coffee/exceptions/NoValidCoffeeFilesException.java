@@ -23,23 +23,29 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package bolt.web.coffee.io;
+package bolt.web.coffee.exceptions;
 
-import bolt.web.coffee.dependency.CoffeeIdentifier;
-import bolt.web.coffee.dependency.graph.DependencyGraph;
 
 /**
- * Implementation prototype for an object which accepts dependency information and exports it based on specified options.
+ * This exception is thrown when no valid {@code .coffee} files are passed to coffee-graph.
  * 
  * @author Matt Bolt
  */
-public interface Exporter {
+public class NoValidCoffeeFilesException extends Exception {
 
-    /**
-     * This method exports the ordered list of {@link CoffeeIdentifier} based on the implementation.
-     *
-     * @param graph The {@link DependencyGraph} that ordered list is based on.
-     */
-    void export(DependencyGraph<CoffeeIdentifier> graph);
+    public NoValidCoffeeFilesException() {
+    }
+
+    public NoValidCoffeeFilesException(String s) {
+        super(s);
+    }
+
+    public NoValidCoffeeFilesException(String s, Throwable throwable) {
+        super(s, throwable);
+    }
+
+    public NoValidCoffeeFilesException(Throwable throwable) {
+        super(throwable);
+    }
 
 }

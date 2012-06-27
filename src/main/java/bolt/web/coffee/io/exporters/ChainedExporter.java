@@ -23,23 +23,57 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package bolt.web.coffee.io;
+package bolt.web.coffee.io.exporters;
 
 import bolt.web.coffee.dependency.CoffeeIdentifier;
 import bolt.web.coffee.dependency.graph.DependencyGraph;
+import bolt.web.coffee.exceptions.ChainedExportException;
+import bolt.web.coffee.io.Exporter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Implementation prototype for an object which accepts dependency information and exports it based on specified options.
+ * This class executes multiple {@link Exporter} implementations serially using a copy of the input dependency graph.
  * 
  * @author Matt Bolt
  */
-public interface Exporter {
+public class ChainedExporter implements Exporter {
 
-    /**
-     * This method exports the ordered list of {@link CoffeeIdentifier} based on the implementation.
-     *
-     * @param graph The {@link DependencyGraph} that ordered list is based on.
-     */
-    void export(DependencyGraph<CoffeeIdentifier> graph);
+    private final List<Exporter> exporters = new ArrayList<Exporter>();
 
+    public ChainedExporter() {
+
+    }
+
+    public ChainedExporter(Exporter...exporters) {
+        for (Exporter exporter : exporters) {
+            addExporter(exporter);
+        }
+    }
+
+    public void addExporter(Exporter exporter) {
+        exporters.add(exporter);
+    }
+
+    @Override
+    public void export(DependencyGraph<CoffeeIdentifier> graph) {
+        List<Throwable> throwables = null;
+
+        for (Exporter exporter : exporters) {
+            try {
+                exporter.export(graph.copy());
+            }
+            catch (RuntimeException e) {
+                if (null == throwables) {
+                    throwables = new ArrayList<Throwable>();
+                }
+                throwables.add(e.getCause());
+            }
+        }
+
+        if (null != throwables) {
+            throw new ChainedExportException(throwables);
+        }
+    }
 }

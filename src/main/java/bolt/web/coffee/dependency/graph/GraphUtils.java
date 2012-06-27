@@ -87,6 +87,7 @@ public final class GraphUtils {
     {
         DependencyGraph<T> graph = dependencyGraph.copy();
         List<T> ordered = topologicalSort(dependencyGraph);
+
         Set<String> alreadyPrinted = new HashSet<String>();
 
         for (T root : ordered) {

@@ -30,25 +30,26 @@ import bolt.web.coffee.dependency.graph.CyclicDependencyException;
 import bolt.web.coffee.dependency.graph.DependencyGraph;
 import bolt.web.coffee.dependency.graph.GraphUtils;
 
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
 import java.util.List;
 
-import static java.lang.System.out;
-
 /**
- * This {@link bolt.web.coffee.io.Exporter} implementation will print the files, in order, to standard out.
+ * This class will export the dependency list to the clipboard.
  * 
  * @author Matt Bolt
  */
-public class ListFilesExporter extends AbstractExporter {
+public class ClipboardExporter extends AbstractExporter {
 
     private final boolean multiLine;
 
-    public ListFilesExporter() {
+    public ClipboardExporter() {
         this(false);
     }
 
-    public ListFilesExporter(boolean multiLine) {
+    public ClipboardExporter(boolean multiLine) {
         this.multiLine = multiLine;
     }
 
@@ -63,19 +64,24 @@ public class ListFilesExporter extends AbstractExporter {
         }
 
         List<CoffeeIdentifier> trimmed = trimDuplicateFiles(identifiers);
+        StringBuilder builder = new StringBuilder();
 
         for (CoffeeIdentifier identifier : trimmed) {
             try {
                 String path = identifier.getFile().getCanonicalPath();
+                builder.append(path);
 
                 if (multiLine) {
-                    out.println(path);
+                    builder.append("\n");
                 } else {
-                    out.print(path + ' ');
+                    builder.append(" ");
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(new StringSelection(builder.toString()), null);
     }
 }

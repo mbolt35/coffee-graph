@@ -23,23 +23,27 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package bolt.web.coffee.io;
+package bolt.web.coffee.exceptions;
 
-import bolt.web.coffee.dependency.CoffeeIdentifier;
-import bolt.web.coffee.dependency.graph.DependencyGraph;
+import java.util.List;
 
 /**
- * Implementation prototype for an object which accepts dependency information and exports it based on specified options.
+ * This exception is thrown as part of a full execution of exports. When a single export fails, we'll continue to try
+ * and export. Upon completion of all exports, all throwable causes will come back as part of this exception.
  * 
  * @author Matt Bolt
  */
-public interface Exporter {
+public class ChainedExportException extends RuntimeException {
 
-    /**
-     * This method exports the ordered list of {@link CoffeeIdentifier} based on the implementation.
-     *
-     * @param graph The {@link DependencyGraph} that ordered list is based on.
-     */
-    void export(DependencyGraph<CoffeeIdentifier> graph);
+    private final List<Throwable> exceptions;
 
+    public ChainedExportException(List<Throwable> exceptions) {
+        super();
+
+        this.exceptions = exceptions;
+    }
+
+    public List<Throwable> getExceptions() {
+        return exceptions;
+    }
 }

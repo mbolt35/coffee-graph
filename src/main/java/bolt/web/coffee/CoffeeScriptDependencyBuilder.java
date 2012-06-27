@@ -30,7 +30,7 @@ import bolt.web.coffee.dependency.CoffeeIdentifier;
 import bolt.web.coffee.dependency.CoffeeScriptDependencies;
 import bolt.web.coffee.dependency.graph.CyclicDependencyException;
 import bolt.web.coffee.dependency.graph.DependencyGraph;
-import bolt.web.coffee.dependency.graph.GraphUtils;
+import bolt.web.coffee.exceptions.NoValidCoffeeFilesException;
 import bolt.web.coffee.exceptions.RequiredBuilderComponentException;
 import bolt.web.coffee.io.Exporter;
 import bolt.web.coffee.io.Lexer;
@@ -70,7 +70,9 @@ public class CoffeeScriptDependencyBuilder {
         return this;
     }
 
-    public void build(List<File> fileTargets) throws CyclicDependencyException, RequiredBuilderComponentException {
+    public void build(List<File> fileTargets)
+        throws CyclicDependencyException, RequiredBuilderComponentException, NoValidCoffeeFilesException
+    {
         check(coffeeLexer, "coffeeLexer", "withTokensFrom");
         check(coffeeParser, "coffeeParser", "parsedWith");
         check(coffeeExporter, "coffeeExporter", "exportedBy");
@@ -80,19 +82,18 @@ public class CoffeeScriptDependencyBuilder {
 
         // 1. Collect all of the files in each directory provided
         List<File> files = FileHelper.collectFiles(fileTargets, FileType.Coffee);
+        if (files.isEmpty()) {
+            throw new NoValidCoffeeFilesException("No coffee-script source files were found in provided paths/files.");
+        }
 
         // 2. Build CoffeeScript Tree
         CoffeeTree tree = coffeeParser.parse(coffeeLexer, files);
 
         // 3. Generate Dependency Graph, Execute a Topological Sort
         DependencyGraph<CoffeeIdentifier> graph = dependencies.generateGraph(tree);
-        List<CoffeeIdentifier> identifiers = GraphUtils.topologicalSort(graph);
 
         // 4. Export
-        coffeeExporter.export(identifiers);
-
-        //Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-        //clipboard.setContents(new StringSelection(command), null);
+        coffeeExporter.export(graph);
     }
 
     private <T> void check(T instance, String name, String methodName) throws RequiredBuilderComponentException {

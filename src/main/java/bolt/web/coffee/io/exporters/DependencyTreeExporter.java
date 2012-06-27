@@ -25,10 +25,29 @@
 
 package bolt.web.coffee.io.exporters;
 
+import bolt.web.coffee.dependency.CoffeeIdentifier;
+import bolt.web.coffee.dependency.graph.CyclicDependencyException;
+import bolt.web.coffee.dependency.graph.DependencyGraph;
+import bolt.web.coffee.dependency.graph.GraphUtils;
+import bolt.web.coffee.io.Exporter;
+
 /**
- * 
+ * This class simply exports the ordered dependency "tree" to standard out.
  * 
  * @author Matt Bolt
  */
-public class CoffeeDependencyExporter {
+public class DependencyTreeExporter implements Exporter {
+
+    @Override
+    public void export(DependencyGraph<CoffeeIdentifier> graph) {
+        try {
+            System.out.println("\nCoffee-Graph Object Dependency Tree");
+            System.out.println("===================================");
+            GraphUtils.printDependencies(graph);
+            System.out.println("===================================");
+        }
+        catch (CyclicDependencyException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

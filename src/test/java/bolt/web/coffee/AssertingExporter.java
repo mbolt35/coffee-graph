@@ -26,6 +26,9 @@
 package bolt.web.coffee;
 
 import bolt.web.coffee.dependency.CoffeeIdentifier;
+import bolt.web.coffee.dependency.graph.CyclicDependencyException;
+import bolt.web.coffee.dependency.graph.DependencyGraph;
+import bolt.web.coffee.dependency.graph.GraphUtils;
 import bolt.web.coffee.io.exporters.AbstractExporter;
 
 import java.util.List;
@@ -43,7 +46,15 @@ public class AssertingExporter extends AbstractExporter {
     }
 
     @Override
-    public void export(List<CoffeeIdentifier> identifiers) {
+    public void export(DependencyGraph<CoffeeIdentifier> graph) {
+        List<CoffeeIdentifier> identifiers;
+        try {
+            identifiers = GraphUtils.topologicalSort(graph);
+        }
+        catch (CyclicDependencyException e) {
+            throw new RuntimeException(e);
+        }
+
         List<CoffeeIdentifier> trimmed = trimDuplicateFiles(identifiers);
 
         try {
