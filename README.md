@@ -35,11 +35,11 @@ Let's say I have a directory `src` that contains three `.coffee` source files:
         okDoIt()
 
     class Blah
-        constructor: ->
+      constructor: ->
 
-        doIt: ->
-          aBlah = new AnotherBlah()
-      aBlah.doIt();
+      doIt: ->
+        aBlah = new AnotherBlah()
+        aBlah.doIt();
 
     b = new Blah()
     b.doIt()
