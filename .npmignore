@@ -1,0 +1,7 @@
+.git*
+*.iml
+.idea/
+.DS_Store
+src/
+target/
+pom.xml

@@ -80,7 +80,7 @@
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
-                    <outputDirectory>${basedir}/bin</outputDirectory>
+                    <outputDirectory>${basedir}/bin/jar</outputDirectory>
                     <appendAssemblyId>false</appendAssemblyId>
                     <finalName>coffee-graph</finalName>
                 </configuration>

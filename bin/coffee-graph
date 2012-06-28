@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+
+// TODO: Since we require Java 6 here, we should add checks the runtime.
+// TODO: It's also possible that java doesn't exist on their path, in which
+// TODO: case, we'd need to attempt to find it.
+
+var exec = require('child_process').exec;
+var jar  = require('path').join(__dirname, 'jar', 'coffee-graph.jar');
+
+function handleOutput(error, stdout, stderr) {
+  if (error) {
+    console.log(error);
+  } else if (stdout) {
+    console.log(stdout);
+  } else if (stderr) {
+    console.log(stderr);
+  }
+}
+
+function execute(args) {
+  exec('java -jar ' + jar + ' ' + args, handleOutput)
+}
+
+execute(process.argv.slice(2).join(' '));

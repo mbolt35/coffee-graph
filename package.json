@@ -1,0 +1,25 @@
+{
+  "name":         "coffee-graph",
+  "description":  "CoffeeScript build tool for ordering multi-file dependencies",
+  "keywords":     ["javascript", "coffeescript", "compiler", "build", "tool", "order", "dependencies"],
+  "author":       "Matt Bolt",
+  "version":      "0.0.3",
+  "licenses":     [{
+    "type":       "MIT",
+    "url":        "https://raw.github.com/mbolt35/coffee-graph/master/LICENSE"
+  }],
+  "engines":      {
+    "node":       ">=0.4.0"
+  },
+  "directories" : {
+    "lib" : "./bin/jar"
+  },
+  "bin" : "./bin/coffee-graph",
+  "homepage":     "http://mattbolt.blogspot.com",
+  "bugs":         "https://github.com/mbolt35/coffee-graph/issues",
+  "repository":   {
+    "type": "git",
+    "url": "git://github.com/mbolt35/coffee-graph.git"
+  },
+  "preferGlobal" : "true"
+}
