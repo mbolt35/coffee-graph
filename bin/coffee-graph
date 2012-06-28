@@ -44,7 +44,7 @@ function processArguments(args) {
     result[i] = trim(result[i]);
     
     if (!isOption(result[i])) {
-      result[i] = wrap(fs.realpathSync(result[i]));
+      result[i] = wrap(result[i]);
     }
   }
   

@@ -73,8 +73,12 @@ public class CoffeeScriptCompileExporter extends AbstractExporter {
                 }
             }
 
-            if (null != outputFile.getParentFile() && !outputFile.getParentFile().mkdirs()) {
-                throw new RuntimeException("Could not create the file for export.");
+            if (null != outputFile.getParentFile()) {
+                File parentFile = outputFile.getParentFile();
+
+                if (!parentFile.exists() && !parentFile.mkdirs()) {
+                    throw new RuntimeException("Could not create the file for export.");
+                }
             }
 
             if (!outputFile.createNewFile() || !outputFile.isFile()) {
