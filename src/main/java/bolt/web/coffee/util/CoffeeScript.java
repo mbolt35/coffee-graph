@@ -55,8 +55,6 @@ public class CoffeeScript {
     private static final String PARSE = "CoffeeScript.nodes(coffeeFile, { bare: true });";
     private static final String VERSION = "CoffeeScript.VERSION";
 
-    private static final String DEBUG = "debug()";
-
     private final Scriptable javascript;
 
     public CoffeeScript() {
@@ -173,56 +171,6 @@ public class CoffeeScript {
         } finally {
             Context.exit();
         }
-    }
-
-    public void debug() {
-        Context context = Context.enter();
-        Scriptable parseScope = context.newObject(javascript);
-        parseScope.setParentScope(javascript);
-        //parseScope.put("coffeeFile", parseScope, coffeeSource);
-
-        try {
-            trace(context.evaluateString(parseScope, DEBUG, "CoffeeScript", 0, null));
-        } finally {
-            Context.exit();
-        }
-    }
-    private void trace(Object object) {
-        trace(object, "");
-    }
-
-    private void trace(Object object, String spacing) {
-        if (object instanceof NativeArray) {
-            NativeArray arr = (NativeArray) object;
-            for (Object o : arr) {
-                trace(o, spacing + "  ");
-            }
-            return;
-        }
-
-        if (object instanceof NativeObject) {
-            NativeObject nativeObj = (NativeObject) object;
-            System.out.println(spacing + "Class: " + nativeObj.getClassName());
-            for (Object key : nativeObj.keySet()) {
-                System.out.println(spacing + "[Key: " + key + "]" );
-                trace(nativeObj.get(key), spacing + "  ");
-            }
-            return;
-        }
-
-        if (isJavaPrimitive(object)) {
-            System.out.println(spacing + object);
-        } else {
-            // System.out.println(spacing + ToStringBuilder.reflectionToString(object));
-        }
-    }
-
-    private boolean isJavaPrimitive(Object object) {
-        return object instanceof String
-            || object instanceof Integer
-            || object instanceof Float
-            || object instanceof Double
-            || object instanceof Boolean;
     }
 
     /**
