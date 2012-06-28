@@ -14,6 +14,7 @@
         <jcommander.version>1.25</jcommander.version>
         <rhino.version>1.7R3</rhino.version>
         <testng.version>6.5.2</testng.version>
+        <gmaven.version>1.3</gmaven.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -50,6 +51,23 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>gmaven-plugin</artifactId>
+                <version>${gmaven.version}</version>
+                <executions>
+                    <execution>
+                        <id>create-version</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <source>${basedir}/src/main/groovy/CoffeeGraphVersion.groovy</source>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
@@ -73,6 +91,25 @@
                         <goals>
                             <goal>single</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <id>attach-version-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/version/</source>
+                            </sources>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -103,6 +140,39 @@
             </extension>
         </extensions>
     </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.8.1</version>
+                <configuration>
+                    <stylesheetfile>${basedir}/src/main/site/javadoc-stylesheets.css</stylesheetfile>
+                    <links>
+                        <link>http://java.sun.com/javase/6/docs/api/</link>
+                    </links>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
+
+    <developers>
+        <developer>
+            <id>mbolt35</id>
+            <name>Matt Bolt</name>
+            <email>mbolt35@gmail.com</email>
+            <roles>
+                <role>Project Lead</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
+    </developers>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/mbolt35/coffee-graph/issues</url>
+    </issueManagement>
 
     <repositories>
         <repository>

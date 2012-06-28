@@ -25,6 +25,7 @@
 
 package bolt.web.coffee.io.exporters;
 
+import bolt.web.coffee.CoffeeGraphVersion;
 import bolt.web.coffee.dependency.CoffeeIdentifier;
 import bolt.web.coffee.dependency.graph.CyclicDependencyException;
 import bolt.web.coffee.dependency.graph.DependencyGraph;
@@ -92,7 +93,7 @@ public class CoffeeScriptCompileExporter extends AbstractExporter {
             out = new BufferedWriter(new FileWriter(outputFile));
 
             // Write CoffeeScript version used
-            out.write("// Compiled with CoffeeScript v" + coffeeScript.getVersion() + "\n\n");
+            out.write( getHeader(coffeeScript) );
             for (CoffeeIdentifier identifier : identifiers) {
                 File coffeeSource = identifier.getFile();
                 System.out.println("Compiling: " + coffeeSource.getName());
@@ -113,5 +114,10 @@ public class CoffeeScriptCompileExporter extends AbstractExporter {
         }
 
         System.out.println("Coffee-Script compiled successfully.");
+    }
+
+    private String getHeader(CoffeeScript coffeeScript) {
+        return "// [Dependencies Linked with CoffeeGraph v" + CoffeeGraphVersion.Version + "]\n" +
+            "// [Compiled with CoffeeScript v" + coffeeScript.getVersion() + "]\n\n";
     }
 }
