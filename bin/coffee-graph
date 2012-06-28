@@ -18,7 +18,7 @@ function handleOutput(error, stdout, stderr) {
 }
 
 function execute(args) {
-  exec('java -jar ' + jar + ' ' + args, handleOutput)
+  exec('java -jar ' + jar + ' ' + args, handleOutput);
 }
 
 execute(process.argv.slice(2).join(' '));
