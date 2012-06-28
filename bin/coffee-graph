@@ -5,7 +5,9 @@
 // TODO: case, we'd need to attempt to find it.
 
 var exec = require('child_process').exec;
-var jar  = require('path').join(__dirname, 'jar', 'coffee-graph.jar');
+var path = require('path');
+var dirname = path.dirname(require('fs').realpathSync(__filename));
+var jar  = '"' + path.join(dirname, 'jar', 'coffee-graph.jar') + '"';
 
 function handleOutput(error, stdout, stderr) {
   if (error) {

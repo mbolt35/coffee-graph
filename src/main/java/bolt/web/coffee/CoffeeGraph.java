@@ -38,6 +38,7 @@ import bolt.web.coffee.io.exporters.ChainedExporter;
 import bolt.web.coffee.io.exporters.CoffeeScriptCompileExporter;
 import bolt.web.coffee.io.exporters.DependencyTreeExporter;
 import bolt.web.coffee.io.exporters.ListFilesExporter;
+import bolt.web.coffee.util.CoffeeScript;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 
@@ -67,8 +68,21 @@ public class CoffeeGraph implements Runnable {
             return;
         }
 
+        if (command.version) {
+            System.out.println(getVersionInfo());
+            System.exit(0);
+            return;
+        }
+
         Thread thread = new Thread(new CoffeeGraph(command));
         thread.start();
+    }
+
+    private static String getVersionInfo() {
+        return "[CoffeeGraph v" + CoffeeGraphVersion.Version + "]\n" +
+               " +- Running: CoffeeScript v" + new CoffeeScript().getVersion() + "\n" +
+               " +- Using: Java v" + System.getProperty("java.version") +
+                    " from " + System.getProperty("java.vendor");
     }
 
     private final CoffeeGraphCommand command;
