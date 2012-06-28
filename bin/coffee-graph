@@ -4,11 +4,54 @@
 // TODO: It's also possible that java doesn't exist on their path, in which
 // TODO: case, we'd need to attempt to find it.
 
+var windows = require('os').type().toLowerCase().indexOf("windows") != -1;
 var exec = require('child_process').exec;
-var path = require('path');
-var dirname = path.dirname(require('fs').realpathSync(__filename));
-var jar  = '"' + path.join(dirname, 'jar', 'coffee-graph.jar') + '"';
+var path  = require('path');
+var fs = require('fs');
 
+// For windows directories. Converts "C:\Foo\" -> "C:\Foo"
+function trim(file) {
+  if (file.indexOf('"') != -1) {
+    return file.replace('"', '');
+  }
+  
+  return file;
+}
+
+// Wraps the String in Quotations
+function wrap(file) {
+  return '"' + file + '"';
+}
+
+// Uses the fs and path modules to determine the real directory name
+function realDir(file) {
+  return path.dirname(fs.realpathSync(file));
+}
+
+// Determine if the argument is an option
+function isOption(arg) {
+  return arg.charAt(0) === "-";
+}
+
+// Fix-up any potential windows file system madness.
+function processArguments(args) {
+  var result = args.slice(2);
+  if (!windows) {
+    return result;
+  }
+  
+  for (var i = 0; i < result.length; ++i) {
+    result[i] = trim(result[i]);
+    
+    if (!isOption(result[i])) {
+      result[i] = wrap(fs.realpathSync(result[i]));
+    }
+  }
+  
+  return result;
+}
+
+// Execution callback
 function handleOutput(error, stdout, stderr) {
   if (error) {
     console.log(error);
@@ -19,8 +62,7 @@ function handleOutput(error, stdout, stderr) {
   }
 }
 
-function execute(args) {
-  exec('java -jar ' + jar + ' ' + args, handleOutput);
-}
+var args = processArguments(process.argv).join(' ');
+var jar = wrap( path.join(realDir(__filename), 'jar', '/coffee-graph.jar') );
 
-execute(process.argv.slice(2).join(' '));
+exec('java -jar ' + jar + ' ' + args, handleOutput);

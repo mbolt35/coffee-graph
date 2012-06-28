@@ -3,7 +3,7 @@
   "description":  "CoffeeScript build tool for ordering multi-file dependencies",
   "keywords":     ["javascript", "coffeescript", "compiler", "build", "tool", "order", "dependencies"],
   "author":       "Matt Bolt",
-  "version":      "0.0.4",
+  "version":      "0.0.5",
   "licenses":     [{
     "type":       "MIT",
     "url":        "https://raw.github.com/mbolt35/coffee-graph/master/LICENSE"
