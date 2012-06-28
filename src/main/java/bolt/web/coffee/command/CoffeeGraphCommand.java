@@ -59,6 +59,9 @@ public final class CoffeeGraphCommand {
     @Parameter(names = {"--help", "-h"}, description = "Show the coffee-graph command line usage.")
     public boolean help = false;
 
+    @Parameter(names = {"--version", "-v"}, description = "Displays the current version of coffee-graph.")
+    public boolean version = false;
+
     public CoffeeGraphCommand() {
 
     }

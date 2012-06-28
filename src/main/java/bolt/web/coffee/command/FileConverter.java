@@ -28,6 +28,7 @@ package bolt.web.coffee.command;
 import com.beust.jcommander.IStringConverter;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * This class blindly converts a {@code String} to a {@code File} instance.
@@ -37,6 +38,10 @@ import java.io.File;
 public class FileConverter implements IStringConverter<File> {
     @Override
     public File convert(String s) {
-        return new File(s);
+        try {
+            return new File(s).getCanonicalFile();
+        } catch (IOException e) {
+            return null;
+        }
     }
 }
