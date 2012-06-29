@@ -7,6 +7,7 @@ Coffee-Graph is an automated build tool for CoffeeScript, which is able to analy
 Coffee-Graph depends on the [Java 6 runtime](http://www.oracle.com/technetwork/java/javase/downloads/index.html) or greater, so ensure that Java is installed and on your ```$PATH```.
 
 Installation of binaries via npm:
+
     $ npm install -g coffee-graph
 
 
@@ -14,15 +15,19 @@ Installation of binaries via npm:
 Coffee-Graph uses [Maven](http://maven.apache.org/) to compile and package the binaries. 
 
 To build: 
+
     $ mvn clean install
 
 To execute: 
+
     $ node ./bin/coffee-graph <options> [files]
 
 Or:
+
     $ ./bin/coffee-graph <options> [files]
 
 To install from source:
+
     $ npm install -g .
 
 
