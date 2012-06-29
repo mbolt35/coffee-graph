@@ -3,6 +3,29 @@
 Coffee-Graph is an automated build tool for CoffeeScript, which is able to analyze large multi-file projects and output an **ordered** listing of the files using cross-file dependencies (if they exist). Coffee-Graph does not require the use of any external JS libraries like RequireJS; just plain vanilla CoffeeScript.
 
 
+## Installation
+Coffee-Graph depends on the [Java 6 runtime](http://www.oracle.com/technetwork/java/javase/downloads/index.html) or greater, so ensure that Java is installed and on your ```$PATH```.
+
+Installation of binaries via npm:
+    $ npm install -g coffee-graph
+
+
+## Building Source
+Coffee-Graph uses [Maven](http://maven.apache.org/) to compile and package the binaries. 
+
+To build: 
+    $ mvn clean install
+
+To execute: 
+    $ node ./bin/coffee-graph <options> [files]
+
+Or:
+    $ ./bin/coffee-graph <options> [files]
+
+To install from source:
+    $ npm install -g .
+
+
 ## Example
 Let's say I have a directory `src` that contains three `.coffee` source files:
 
@@ -46,9 +69,9 @@ Let's say I have a directory `src` that contains three `.coffee` source files:
 
 Using Coffee-Graph, we can generate the correct file ordering for successful execution in a browser:
 
-    $ coffee-graph --print src
-    src/B.coffee
-    src/A.coffee
+    $ coffee-graph -pl src
+    src/B.coffee 
+    src/A.coffee 
     src/C.coffee
 
 Additionally, you can have Coffee-Graph forward compilation directly to CoffeeScript. See the demonstration javascript output at the bottom of this wiki.
