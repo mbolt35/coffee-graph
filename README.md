@@ -9,29 +9,40 @@ Coffee-Graph depends on the [Java 6 runtime](http://www.oracle.com/technetwork/j
 Installation of binaries via npm:
 
     $ npm install -g coffee-graph
+   
+Check installation:
+
+    $ coffee-graph -v
+    [CoffeeGraph v0.0.6]
+     +- Running: CoffeeScript v1.3.3
+     +- Using: Java v1.6.0_33 from Apple Inc.
 
 
-## Building Source
-Coffee-Graph uses [Maven](http://maven.apache.org/) to compile and package the binaries. 
+## Usage
 
-To build: 
+    Usage: coffee-graph [options] file.coffee ... [directory]
+    Options:
+        --compile, -c    Performs an ordered file join and compilation to CoffeeScript
+                         
+        --help, -h       Show the coffee-graph command line usage.
+                         
+        --print, -p      Prints the ordered .coffee files on a single line.
+                         
+        --println, -pl   Prints the ordered .coffee files, one per line.
+                         
+        --tree, -t       Prints a dependency tree.
+                         
+        --version, -v    Displays the current version of coffee-graph.
+                         
+        -o               The file to output the dependency graph to.
+                         Default: lib/coffee-graph.js
 
-    $ mvn clean install
+You can always bring up the usage options with:
 
-To execute: 
-
-    $ node ./bin/coffee-graph <options> [files]
-
-Or:
-
-    $ ./bin/coffee-graph <options> [files]
-
-To install from source:
-
-    $ npm install -g .
+    $ coffee-graph -h
 
 
-## Example
+## Coffee-Graph Demo
 Let's say I have a directory `src` that contains three `.coffee` source files:
 
 **src/A.coffee**
@@ -40,14 +51,15 @@ Let's say I have a directory `src` that contains three `.coffee` source files:
       constructor: (@name) ->
 
       doSomething: -> 
-        helloWorld()
+        helloWorld "Dookie McGee", 51
 
 **src/B.coffee**
 
     class @B
       constructor: (@name) ->
       
-    @helloWorld = -> alert "Hello World!"
+    this.helloWorld = (name, age) -> 
+        console.log "Hello World! My name is #{name} and I am #{age} years old."
 
 **src/C.coffee**
 
@@ -72,15 +84,188 @@ Let's say I have a directory `src` that contains three `.coffee` source files:
     b = new Blah()
     b.doIt()
 
-Using Coffee-Graph, we can generate the correct file ordering for successful execution in a browser:
+Using Coffee-Graph, we can generate the correct file ordering for successful execution in a browser.
+
+
+### Print
+
+Using the `--print` or `-p` command, we can have Coffee-Graph output the ordered files on a single line:
+
+    $ coffee-graph -p src
+    /path/to/src/B.coffee /path/to/src/A.coffee /path/to/src/C.coffee
+
+Similarly, using the `--println` or `-pl` option will output the ordered files, one file per line:
 
     $ coffee-graph -pl src
-    src/B.coffee 
-    src/A.coffee 
-    src/C.coffee
+    /path/to/src/B.coffee 
+    /path/to/src/A.coffee 
+    /path/to/src/C.coffee
+    
+### Dependency Tree
 
-Additionally, you can have Coffee-Graph forward compilation directly to CoffeeScript. See the demonstration javascript output at the bottom of this wiki.
+Using the `--tree` or `-t` command will output a tree-like structure. This tree can be used to visualize the tokens Coffee-Graph has tagged as dependencies, and how they are shared across other dependencies. Keep in mind that this show's both incoming and outgoing edges of the dependency graph:
 
+    $ coffee-graph -t src
+    
+    Coffee-Graph Object Dependency Tree
+    ===================================
+    [age]
+    [helloWorld]
+    [A]
+     +- [helloWorld]
+    [Blah]
+     +- [A]
+     |   +- [helloWorld]
+    [b]
+     +- [A]
+     |   +- [helloWorld]
+    [AnotherBlah]
+     +- [A]
+     |   +- [helloWorld]
+    [B]
+    [name]
+    [doIt]
+     +- [A]
+     |   +- [helloWorld]
+     ===================================
+    
+
+### CoffeeScript Compilation
+
+Using the `--compile` or `-c` command along with the `-o` (output) command will forward the ordered files directly to the CoffeeScript compiler. Currently, Coffee-Graph uses an embedded CoffeeScript compiler (`v1.3.3`). 
+
+The following will output a single `output.js` file containing the ordered compiled `.coffee` files in the `src` directory:
+
+    $ coffee-graph -o output.js -c src
+    Compiling CoffeeScript -> /path/to/output.js
+    Compiling: B.coffee
+    Compiling: A.coffee
+    Compiling: C.coffee
+    Coffee-Script compiled successfully.
+    
+    
+The contents of the `output.js` file are:
+
+    // [Dependencies Linked with CoffeeGraph v0.0.6]
+    // [Compiled with CoffeeScript v1.3.3]
+
+    this.B = (function() {
+
+      function B(name) {
+        this.name = name;
+      }
+
+      return B;
+
+    })();
+
+    this.helloWorld = function(name, age) {
+      return alert("Hello World! My name is " + name + " and I am " + age + " years old.");
+    };
+
+
+    this.A = (function() {
+
+      function A(name) {
+        this.name = name;
+      }
+
+      A.prototype.doSomething = function() {
+        return helloWorld("Dookie McGee", 51);
+      };
+
+      return A;
+
+    })();
+
+    var AnotherBlah, Blah, b;
+
+    AnotherBlah = (function() {
+
+      function AnotherBlah() {}
+
+      AnotherBlah.prototype.doIt = function() {
+        var okDoIt;
+        okDoIt = function() {
+          var seriouslyThisTime;
+          seriouslyThisTime = function() {
+            var a;
+            a = new A();
+            return a.doSomething();
+          };
+          return seriouslyThisTime();
+        };
+        return okDoIt();
+      };
+
+      return AnotherBlah;
+
+    })();
+
+    Blah = (function() {
+
+      function Blah() {}
+
+      Blah.prototype.doIt = function() {
+        var aBlah;
+        aBlah = new AnotherBlah();
+        return aBlah.doIt();
+      };
+
+      return Blah;
+
+    })();
+
+    b = new Blah();
+
+    b.doIt();
+
+
+### Chaining Coffee-Graph Options
+
+You can also chain command line options together:
+
+    $ coffee-graph -pl -t -o output.js -c src
+    /Users/mattbolt/Development/coffee-graph/src/test/resources/demo/B.coffee
+    /Users/mattbolt/Development/coffee-graph/src/test/resources/demo/A.coffee
+    /Users/mattbolt/Development/coffee-graph/src/test/resources/demo/C.coffee
+
+    Coffee-Graph Object Dependency Tree
+    ===================================
+    [age]
+    [helloWorld]
+    [A]
+     +- [helloWorld]
+    [Blah]
+     +- [A]
+     |   +- [helloWorld]
+    [b]
+     +- [A]
+     |   +- [helloWorld]
+    [AnotherBlah]
+     +- [A]
+     |   +- [helloWorld]
+    [B]
+    [name]
+    [doIt]
+     +- [A]
+     |   +- [helloWorld]
+    ===================================
+    Compiling CoffeeScript -> /Users/mattbolt/output.js
+    Compiling: B.coffee
+    Compiling: A.coffee
+    Compiling: C.coffee
+    Coffee-Script compiled successfully.
+
+### Usage Notes
+
+Concerning the embedded CoffeeScript compiler, and how the files are joined:
+* Coffee-Graph is currently compiling each `.coffee` file one at a time and concatenating the result.
+** Note: I seem to vaguely recall reading that the `.coffee` files should be concatenated prior to compilation. Can anyone confirm?
+
+Concerning the embedded CoffeeScript compiler, there are a few improvements we can make here:
+* Build a node.js module which can retrieve the file listing to be plugged into a cake build.
+* Allow the CoffeeScript compiler JS to be passed in as a URL.
 
 ## How It Works
 Coffee-Graph was built in Java 6 and uses Mozilla's Rhino javascript engine to wrap the [CoffeeScript compiler](https://github.com/jashkenas/coffee-script/blob/master/extras/coffee-script.js). Each `.coffee` source file that is passed to the application is passed through the CoffeeScript.tokens() method. The tokens are then added to a pseudo Abstract Syntax Tree (AST), where each level of scope is generated based on `INDENT` and `OUTDENT` tokens. Parsing each file will also generate it's own file-level scope in the tree. 
@@ -108,6 +293,27 @@ I needed these external concerns to go away, so I started to build a maven plugi
 The original find/replace algorithm turned into an attempt to reproduce the CoffeeScript grammar in `javacc`. I had some success, but ultimately, my grammar was only 90% accurate when parsing the CoffeeScript unit tests. After this approach, I looked into [JCoffeeScript](https://github.com/yeungda/jcoffeescript), which executes the JS CoffeeScript compiler using [Rhino](http://www.mozilla.org/rhino/). Obviously, this was a much more maintainable approach, and the rest is history.
 
 
+## Building/Running the Source
+Coffee-Graph uses [Maven](http://maven.apache.org/) to compile and package the binaries. 
+
+To build: 
+
+    $ mvn clean install
+
+To execute with Node.js:
+
+    $ node ./bin/coffee-graph <options> [files]
+
+To execute with Java:
+
+    $ java -jar bin/coffee-graph <options> [files]
+
+To install from source:
+
+    $ npm install -g .
+
+
+
 ## About Me
 Name: Matt Bolt<br/>
 Email: mbolt35@gmail.com<br/>
@@ -120,9 +326,18 @@ Education: B.S. in Computer Science, Clemson University<br/>
 ## Special Thanks
 Thanks to Jeremy Ashkenas and all who have contributed to the CoffeeScript project.<br/>
 Thanks to David Yeung and the contributors on the JCoffeeScript project.<br/>
+Thanks to Cédric Beust, author of JCommander which is used in Coffee-Graph.<br/>
 Thanks to R.J. Lorimer for comments, suggestions, and code review.
 
-## License
+
+## Technology Licensing
+CoffeeScript, MIT: https://github.com/jashkenas/coffee-script/blob/master/LICENSE<br/>
+JCommander, Apache 2.0 Software License: https://github.com/cbeust/jcommander/blob/master/license.txt<br/>
+JUnit, Common Public License v1.0: http://www.junit.org/license<br/>
+Rhino, Mozilla Public License v2.0: http://www.mozilla.org/MPL
+
+
+## Coffee-Graph License - MIT
 Coffee-Graph<br/>
 Copyright(C) 2012, Matt Bolt, mbolt35@gmail.com
 
