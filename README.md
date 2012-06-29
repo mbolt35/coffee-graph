@@ -159,7 +159,7 @@ The contents of the `output.js` file are:
     })();
 
     this.helloWorld = function(name, age) {
-      return alert("Hello World! My name is " + name + " and I am " + age + " years old.");
+      return console.log("Hello World! My name is " + name + " and I am " + age + " years old.");
     };
 
 
