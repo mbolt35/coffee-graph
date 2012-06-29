@@ -45,7 +45,7 @@ You can always bring up the usage options with:
 ## Coffee-Graph Demo
 Let's say I have a directory `src` that contains three `.coffee` source files:
 
-**src/A.coffee**
+`src/A.coffee`
 
     class @A
       constructor: (@name) ->
@@ -53,7 +53,7 @@ Let's say I have a directory `src` that contains three `.coffee` source files:
       doSomething: -> 
         helloWorld "Dookie McGee", 51
 
-**src/B.coffee**
+`src/B.coffee`
 
     class @B
       constructor: (@name) ->
@@ -61,7 +61,7 @@ Let's say I have a directory `src` that contains three `.coffee` source files:
     this.helloWorld = (name, age) -> 
         console.log "Hello World! My name is #{name} and I am #{age} years old."
 
-**src/C.coffee**
+`src/C.coffee`
 
     class AnotherBlah
       constructor: ->
@@ -85,7 +85,6 @@ Let's say I have a directory `src` that contains three `.coffee` source files:
     b.doIt()
 
 Using Coffee-Graph, we can generate the correct file ordering for successful execution in a browser.
-
 
 ### Print
 
