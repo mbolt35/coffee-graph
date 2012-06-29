@@ -50,32 +50,8 @@ import com.beust.jcommander.ParameterException;
 public class CoffeeGraph implements Runnable {
 
     public static void main(String[] arguments) {
-        CoffeeGraphCommand command = new CoffeeGraphCommand();
-
-        JCommander commander = new JCommander(command);
-        commander.setProgramName("CoffeeGraph");
-        commander.addConverterFactory(new FileConverterFactory());
-
-        try {
-            commander.parse(arguments);
-        }
-        catch (ParameterException e) {
-            commander.usage();
-        }
-
-        if (command.help) {
-            commander.usage();
-            return;
-        }
-
-        if (command.version) {
-            System.out.println(getVersionInfo());
-            System.exit(0);
-            return;
-        }
-
-        Thread thread = new Thread(new CoffeeGraph(command));
-        thread.start();
+        CoffeeGraph coffeeGraph = new CoffeeGraph(arguments);
+        coffeeGraph.run();
     }
 
     private static String getVersionInfo() {
@@ -85,14 +61,43 @@ public class CoffeeGraph implements Runnable {
                     " from " + System.getProperty("java.vendor");
     }
 
+    private final String[] arguments;
+
+    private final JCommander commander;
     private final CoffeeGraphCommand command;
 
-    public CoffeeGraph(CoffeeGraphCommand command) {
-        this.command = command;
+    private StringBuilder usageString;
+
+    public CoffeeGraph(String[] arguments) {
+        this.arguments = arguments;
+
+        command = new CoffeeGraphCommand();
+        commander = new JCommander(command);
+        commander.setProgramName("coffee-graph");
+        commander.setColumnSize(100);
+        commander.addConverterFactory(new FileConverterFactory());
     }
 
     @Override
     public void run() {
+        try {
+            commander.parse(arguments);
+        }
+        catch (ParameterException e) {
+            usage();
+            return;
+        }
+
+        if (command.help) {
+            usage();
+            return;
+        }
+
+        if (command.version) {
+            System.out.println(getVersionInfo());
+            return;
+        }
+
         try {
             new CoffeeScriptDependencyBuilder()
                 .withTokensFrom(new CoffeeScriptLexer())
@@ -101,21 +106,25 @@ public class CoffeeGraph implements Runnable {
                 .build(command.files);
         }
         catch (RequiredBuilderComponentException e) {
+            // This is more of a developer error -- maybe be nice to have in ant/maven plugin dev or extensions
             e.printStackTrace();
         }
         catch (NoValidCoffeeFilesException e) {
-            System.out.println(e.getMessage());
+            System.out.println("[CoffeeGraph Error: " + e.getMessage() + "]");
         }
         catch (ChainedExportException e) {
             for (Throwable throwable : e.getExceptions()) {
-                System.out.println("Error: " + throwable.getMessage());
+                System.out.println("[CoffeeGraph Error: " + throwable.getMessage() + "]");
             }
         }
         catch (CyclicDependencyException e) {
-            e.printStackTrace();
+            System.out.println("[CoffeeGraph Error: " + e.getMessage() + "]");
         }
     }
 
+    /**
+     * Chain the exporters together if more than one is used.
+     */
     private Exporter getExporter() {
         ChainedExporter exporter = new ChainedExporter();
 
@@ -136,5 +145,31 @@ public class CoffeeGraph implements Runnable {
         }
 
         return exporter;
+    }
+
+    /**
+     * Attempted to hide the default boolean fields by using a custom annotation and default provider with JCommander,
+     * but wasn't able to. This is kind of gross, but does the job.
+     */
+    private void usage() {
+        if (null != usageString) {
+            System.out.println(usageString.toString());
+            return;
+        }
+
+        final String defaultText = "Default: false";
+        final int len = defaultText.length();
+
+        usageString = new StringBuilder();
+        commander.usage(usageString);
+
+        int index = usageString.indexOf(defaultText);
+        while (index != -1) {
+            usageString.replace(index, index + len, "");
+
+            index = usageString.indexOf(defaultText);
+        }
+
+        System.out.println(usageString.toString());
     }
 }

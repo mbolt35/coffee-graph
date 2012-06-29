@@ -21,8 +21,5 @@ class @B
 
   # Creates a new B instance
   constructor: (@name) ->
-      
-
-
 
 this.helloWorld = (name, age) -> alert "Hello World! My name is #{name} and I am #{age} years old."

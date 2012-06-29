@@ -38,7 +38,7 @@ import java.util.List;
  */
 public final class CoffeeGraphCommand {
 
-    @Parameter(description = "The .coffee files (or directory) to build the dependency graph for.")
+    @Parameter(description = "file.coffee ... [directory]")
     public List<File> files = new ArrayList<File>();
 
     @Parameter(names = {"--print", "-p"}, description = "Prints the ordered .coffee files on a single line.")
