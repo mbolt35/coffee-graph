@@ -268,7 +268,7 @@ Concerning the embedded CoffeeScript compiler, there are a few improvements we c
 * Allow the CoffeeScript compiler JS to be passed in as a URL.
 
 ## How It Works
-Coffee-Graph was built in Java 6 and uses Mozilla's Rhino javascript engine to wrap the [CoffeeScript compiler](https://github.com/jashkenas/coffee-script/blob/master/extras/coffee-script.js). Each `.coffee` source file that is passed to the application is passed through the CoffeeScript.tokens() method. The tokens are then added to a pseudo Abstract Syntax Tree (AST), where each level of scope is generated based on `INDENT` and `OUTDENT` tokens. Parsing each file will also generate it's own file-level scope in the tree. 
+Coffee-Graph was built in Java 6 and uses Mozilla's Rhino javascript engine to wrap the [CoffeeScript compiler](https://github.com/jashkenas/coffee-script/blob/master/extras/coffee-script.js). Each `.coffee` source file that is passed to the application is passed through the `CoffeeScript.tokens()` method. The tokens are then added to a pseudo Abstract Syntax Tree (AST), where each level of scope is generated based on `INDENT` and `OUTDENT` tokens. Parsing each file will also generate it's own file-level scope in the tree. 
 
 Using this `CoffeeTree` instance, we can search for globally defined identifiers (using `@`,`this`, or `window`) as well as outgoing and incoming edges between those identifiers. Using this information, Coffee-Graph builds a dependency graph using the outgoing/incoming edges relating the identifiers. 
 
