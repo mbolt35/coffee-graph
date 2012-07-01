@@ -256,15 +256,77 @@ You can also chain command line options together:
     Compiling: C.coffee
     Coffee-Script compiled successfully.
 
-### Usage Notes
+## Usage Notes, Future Updates, and Limitations
+
+### Notes
 
 Concerning the embedded CoffeeScript compiler, and how the files are joined:
 * Coffee-Graph is currently compiling each `.coffee` file one at a time and concatenating the result.
-** Note: I seem to vaguely recall reading that the `.coffee` files should be concatenated prior to compilation. Can anyone confirm?
+* Note: I seem to vaguely recall reading that the `.coffee` files should be concatenated prior to compilation. I believe that the `coffee --join` option works this way. Can anyone confirm? Tweet me @mbolt35
+
+
+### Future Updates
 
 Concerning the embedded CoffeeScript compiler, there are a few improvements we can make here:
 * Build a node.js module which can retrieve the file listing to be plugged into a cake build.
 * Allow the CoffeeScript compiler JS to be passed in as a URL.
+
+
+### Limitations
+
+Coffee-Graph isn't perfect, and there will be CoffeeScript syntax that may cause unexpected output. Additionally, the current version of Coffee-Graph bases dependencies on objects attached to the `this` or `@` object in each file scope. 
+
+Initially, this limitation was a concern due to the `exports` / `require` module pattern used in node.js. However, consider the following example:
+
+`Foo.coffee`:
+    
+    root = exports ? this
+    
+    root.Foo = class Foo 
+        constructor: ->
+        
+        getName: -> "Foo"
+        
+`Bar.coffee`:
+    
+    Foo = require('./Foo').Foo
+    
+    f = new Foo()
+    console.log f.getName()
+    
+    
+In this example, CoffeeGraph will not recognize that it should attach the `this` semantics to `root`, and `Foo` will not be treated as "global." Fortunately, in `Bar.coffee`, `Foo` is defined as `require './Foo'`, so the ordering is irrelevant. In short, if your code uses `exports` and `require` properly, then you most likely won't need Coffee-Graph to link dependencies. 
+
+Based on what I've described in the above example, consider the following:
+
+`Foo.coffee`
+
+    root = this
+    
+    root.Foo = class Foo 
+        constructor: ->
+        
+        getName: -> "Foo"
+        
+`Bar.coffee`
+    
+    f = new Foo()
+    console.log f.getName()
+    
+The following will not correctly link the `Foo` dependency to `Bar.coffee`. While, I am working on a simple solution to account for a single depth of assignment, it will not fully solve the problem, so please be aware of this.
+
+To "fix" the problem above, we simply use the `this` reference to set `Foo`:
+
+`Foo.coffee`
+
+    this.Foo = class Foo 
+        constructor: ->
+        
+        getName -> "Foo"
+        
+
+In summary, it's important to remember that Coffee-Graph only analyzes a small portion of CoffeeScript semantics, and was meant for projects that follow simple "global" attachment rules.
+
 
 ## How It Works
 Coffee-Graph was built in Java 6 and uses Mozilla's Rhino javascript engine to wrap the [CoffeeScript compiler](https://github.com/jashkenas/coffee-script/blob/master/extras/coffee-script.js). Each `.coffee` source file that is passed to the application is passed through the `CoffeeScript.tokens()` method. The tokens are then added to a pseudo Abstract Syntax Tree (AST), where each level of scope is generated based on `INDENT` and `OUTDENT` tokens. Parsing each file will also generate it's own file-level scope in the tree. 
@@ -279,6 +341,7 @@ The popularity of CoffeeScript has caught the eye of a lot of full-stack develop
 
 The basic concept of Coffee-Graph is this:
 > Organize CoffeeScript sources like you would a Java or C# project, in separate folder structures or packages, without worrying about how you're going to reach the compiled product.
+
 
 ## The Story
 Full-stack developers have conventions that are difficult to get away from, especially those who fancy C# and/or Java. These conventions are like breathing to us, and when experimenting with new languages, we tend to carry over those conventions as sort of a security blanket. 
@@ -311,6 +374,9 @@ To install from source:
 
     $ npm install -g .
 
+
+## Bug Reporting
+Please create tickets in the GitHub Issue tracker as you run into them, and I will do my best to address them as soon as possible. 
 
 
 ## About Me
