@@ -22,6 +22,8 @@ Check installation:
 
     Usage: coffee-graph [options] file.coffee ... [directory]
     Options:
+        --bare, -b       Compiles the CoffeeScript source without a security wrapper
+        
         --compile, -c    Performs an ordered file join and compilation to JavaScript
                          
         --help, -h       Show the coffee-graph command line usage.
