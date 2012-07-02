@@ -260,13 +260,6 @@ You can also chain command line options together:
 
 ## Usage Notes, Future Updates, and Limitations
 
-### Notes
-
-Concerning the embedded CoffeeScript compiler, and how the files are joined:
-* Coffee-Graph is currently compiling each `.coffee` file one at a time and concatenating the result.
-* Note: I seem to vaguely recall reading that the `.coffee` files should be concatenated prior to compilation. I believe that the `coffee --join` option works this way. Can anyone confirm? Tweet me @mbolt35
-
-
 ### Future Updates
 
 Concerning the embedded CoffeeScript compiler, there are a few improvements we can make here:
@@ -315,19 +308,7 @@ Based on what I've described in the above example, consider the following:
     f = new Foo()
     console.log f.getName()
     
-The following will not correctly link the `Foo` dependency to `Bar.coffee`. While, I am working on a simple solution to account for a single depth of assignment, it will not fully solve the problem, so please be aware of this.
-
-To "fix" the problem above, we simply use the `this` reference to set `Foo`:
-
-`Foo.coffee`
-
-    this.Foo = class Foo 
-        constructor: ->
-        
-        getName -> "Foo"
-        
-
-In summary, it's important to remember that Coffee-Graph only analyzes a small portion of CoffeeScript semantics, and was meant for projects that follow simple "global" attachment rules.
+The above example used to be a limitation, but as of now, a variable assigned to `this`, `@`, or `window` will inherit the dependency link rules. This solution will most likely not cover all aspects of the CoffeeScript syntax, but hopefully it will provide better support for applications targetting browser and node.js.
 
 
 ## How It Works
