@@ -31,6 +31,7 @@ import bolt.web.coffee.dependency.graph.CyclicDependencyException;
 import bolt.web.coffee.dependency.graph.DependencyGraph;
 import bolt.web.coffee.dependency.graph.GraphUtils;
 import bolt.web.coffee.util.CoffeeScript;
+import bolt.web.coffee.util.FileHelper;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -47,9 +48,14 @@ import java.util.List;
 public class CoffeeScriptCompileExporter extends AbstractExporter {
 
     private final File outputFile;
+    private final boolean bare;
 
     public CoffeeScriptCompileExporter(File outputFile) {
+        this(outputFile, false);
+    }
+    public CoffeeScriptCompileExporter(File outputFile, boolean bare) {
         this.outputFile = outputFile;
+        this.bare = bare;
     }
 
     @Override
@@ -96,15 +102,23 @@ public class CoffeeScriptCompileExporter extends AbstractExporter {
         try {
             out = new BufferedWriter(new FileWriter(outputFile));
 
-            // Write CoffeeScript version used
-            out.write( getHeader(coffeeScript) );
+            StringBuilder joinedCoffee = new StringBuilder();
             for (CoffeeIdentifier identifier : identifiers) {
                 File coffeeSource = identifier.getFile();
-                System.out.println("Compiling: " + coffeeSource.getName());
+                System.out.println("Joining: " + coffeeSource.getName());
 
-                String compiledJs = coffeeScript.compile(coffeeSource);
-                out.write(compiledJs + "\n\n");
+                joinedCoffee.append(FileHelper.loadText(coffeeSource)).append("\n\n");
             }
+
+            System.out.println("Compiling CoffeeScript sources...");
+
+            // Write CoffeeScript version and Coffee-Graph header used
+            out.write( getHeader(coffeeScript) );
+
+            // Compile joined CoffeeScript source
+            String compiledJs = coffeeScript.compile(joinedCoffee.toString(), bare);
+            out.write(compiledJs + "\n\n");
+
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -117,8 +131,10 @@ public class CoffeeScriptCompileExporter extends AbstractExporter {
             }
         }
 
-        System.out.println("Coffee-Script compiled successfully.");
+        System.out.println("CoffeeScript compiled successfully.");
     }
+
+
 
     private String getHeader(CoffeeScript coffeeScript) {
         return "// [Dependencies Linked with CoffeeGraph v" + CoffeeGraphVersion.Version + "]\n" +

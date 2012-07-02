@@ -26,6 +26,8 @@
 package bolt.web.coffee.dependency.graph;
 
 /**
+ * A generic edge  between two nodes in a {@link DependencyGraph}.
+ *
  * @author Matt Bolt
  */
 public class Edge<T> {
@@ -38,10 +40,16 @@ public class Edge<T> {
         this.to = to;
     }
 
+    /**
+     * The origin node.
+     */
     public T getFrom() {
         return this.from;
     }
 
+    /**
+     * The target node.
+     */
     public T getTo() {
         return this.to;
     }

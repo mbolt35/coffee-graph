@@ -50,7 +50,7 @@ public class CoffeeScript {
 
     public static final String COFFEE_JS = "https://raw.github.com/jashkenas/coffee-script/master/extras/coffee-script.js";
 
-    private static final String COMPILE = "CoffeeScript.compile(coffeeFile, { bare: true });";
+    private static final String COMPILE = "CoffeeScript.compile(coffeeFile, { bare: %s });";
     private static final String TOKENIZE = "CoffeeScript.tokens(coffeeFile, { bare: true });";
     private static final String PARSE = "CoffeeScript.nodes(coffeeFile, { bare: true });";
     private static final String VERSION = "CoffeeScript.VERSION";
@@ -139,18 +139,20 @@ public class CoffeeScript {
         }
     }
 
-    public String compile(File coffeeFile) {
-        return compile(FileHelper.loadText(coffeeFile));
+    public String compile(File coffeeFile, boolean bare) {
+        return compile(FileHelper.loadText(coffeeFile), bare);
     }
 
-    public String compile(String coffeeSource) {
+    public String compile(String coffeeSource, boolean bare) {
         Context context = Context.enter();
         Scriptable compileScope = context.newObject(javascript);
         compileScope.setParentScope(javascript);
         compileScope.put("coffeeFile", compileScope, coffeeSource);
 
+        String compileCommand = String.format(COMPILE, String.valueOf(bare));
+
         try {
-            return (String) context.evaluateString(compileScope, COMPILE, "CoffeeScript", 0, null);
+            return (String) context.evaluateString(compileScope, compileCommand, "CoffeeScript", 0, null);
         } finally {
             Context.exit();
         }

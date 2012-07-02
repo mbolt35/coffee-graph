@@ -141,7 +141,7 @@ public class CoffeeGraph implements Runnable {
         }
 
         if (command.compile) {
-            exporter.addExporter(new CoffeeScriptCompileExporter(command.outputFile));
+            exporter.addExporter(new CoffeeScriptCompileExporter(command.outputFile, command.bare));
         }
 
         return exporter;

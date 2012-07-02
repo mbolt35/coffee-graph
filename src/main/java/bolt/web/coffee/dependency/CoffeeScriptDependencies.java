@@ -29,6 +29,7 @@ import bolt.web.coffee.dependency.graph.DependencyGraph;
 import bolt.web.coffee.io.CoffeeToken;
 import bolt.web.coffee.tree.CoffeeScope;
 import bolt.web.coffee.tree.CoffeeTree;
+import bolt.web.coffee.types.CoffeeScriptType;
 import bolt.web.coffee.types.CoffeeSymbolType;
 import bolt.web.coffee.types.CoffeeTokenType;
 
@@ -62,7 +63,6 @@ public class CoffeeScriptDependencies {
     }
 
     public DependencyGraph<CoffeeIdentifier> generateGraph(CoffeeTree tree) {
-
         DependencyGraph<CoffeeIdentifier> graph = new DependencyGraph<CoffeeIdentifier>();
 
         List<OutgoingReferences<CoffeeIdentifier>> outgoing = new ArrayList<OutgoingReferences<CoffeeIdentifier>>();
@@ -80,6 +80,10 @@ public class CoffeeScriptDependencies {
             // Collect all of the global identifiers, determine any potential identifiers referenced
             for (CoffeeToken idToken : idTokens) {
                 CoffeeIdentifier identifier = new CoffeeIdentifier(idToken.getValue(), file, scope.getDepth());
+
+                if (isAssignedToGlobal(scope, idToken)) {
+                    scope.addAssignment(idToken);
+                }
 
                 if (isGlobalScoped(scope, idToken)) {
                     dependencies.add(identifier);
@@ -100,7 +104,6 @@ public class CoffeeScriptDependencies {
 
             for (DependencyReference<CoffeeIdentifier> idReference : references.getOutgoing()) {
                 CoffeeIdentifier resolvedReference = idReference.get();
-                //System.out.println("Parent: " + parentIdentifier.getName() + ", Reference: " + idReference.toString());
                 if (null == resolvedReference) {
                     continue;
                 }
@@ -236,16 +239,58 @@ public class CoffeeScriptDependencies {
 
     private boolean isGlobalScoped(CoffeeScope scope, CoffeeToken token) {
         CoffeeToken before = scope.before(token);
+        if (null == before) {
+            return false;
+        }
 
-        return null != before && (isAt(before) || isThisDot(scope, before));
+        return isAt(before)
+            || isThisDot(scope, before)
+            || isWindowDot(scope, before)
+            || isGlobalDot(scope, before);
+    }
+
+    private boolean isAssignedToGlobal(CoffeeScope scope, CoffeeToken token) {
+        if (!isAssigned(scope, token)) {
+            return false;
+        }
+
+        CoffeeToken after = scope.after(token);
+        while(null != after && !isTerminator(after)) {
+            if (isExports(after) || isAt(after) || isThis(after) || isWindow(after) || hasGlobalAssignment(scope, after)) {
+                after = scope.after(after);
+                if (!isDot(after)) {
+                    return true;
+                }
+                continue;
+            }
+            after = scope.after(after);
+        }
+
+        return true;
+    }
+
+    private boolean hasGlobalAssignment(CoffeeScope scope, CoffeeToken token) {
+        return null != token && scope.hasAssignment(token);
+    }
+
+    private boolean isTerminator(CoffeeToken token) {
+        return null != token && CoffeeTokenType.Terminator == token.getType();
     }
 
     private boolean isThisDot(CoffeeScope scope, CoffeeToken token) {
         return null != token && isDot(token) && isThis(scope.before(token));
     }
 
+    private boolean isWindowDot(CoffeeScope scope, CoffeeToken token) {
+        return null != token && isDot(token) && isWindow(scope.before(token));
+    }
+
+    private boolean isGlobalDot(CoffeeScope scope, CoffeeToken token) {
+        return null != token && isDot(token) && hasGlobalAssignment(scope, scope.before(token));
+    }
+
     private boolean isNew(CoffeeToken token) {
-        return null != token && token.getValue().equals("new");
+        return null != token && CoffeeScriptType.typeFor(token.getValue()) == CoffeeSymbolType.New;
     }
 
     private boolean isExtends(CoffeeToken token) {
@@ -259,6 +304,14 @@ public class CoffeeScriptDependencies {
 
     private boolean isThis(CoffeeToken token) {
         return null != token && CoffeeTokenType.This == token.getType();
+    }
+
+    public boolean isExports(CoffeeToken token) {
+        return null != token && CoffeeScriptType.typeFor(token.getValue()) == CoffeeSymbolType.Exports;
+    }
+
+    private boolean isWindow(CoffeeToken token) {
+        return null != token && CoffeeScriptType.typeFor(token.getValue()) == CoffeeSymbolType.Window;
     }
 
     private boolean isAt(CoffeeToken token) {
