@@ -22,7 +22,7 @@ Check installation:
 
     Usage: coffee-graph [options] file.coffee ... [directory]
     Options:
-        --compile, -c    Performs an ordered file join and compilation to CoffeeScript
+        --compile, -c    Performs an ordered file join and compilation to JavaScript
                          
         --help, -h       Show the coffee-graph command line usage.
                          
