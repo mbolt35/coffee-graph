@@ -9,7 +9,7 @@
     "url":        "https://raw.github.com/mbolt35/coffee-graph/master/LICENSE"
   }],
   "engines":      {
-    "node":       ">=0.4.0"
+    "node":       ">=0.7.1"
   },
   "directories" : {
     "lib" : "./bin/jar"

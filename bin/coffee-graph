@@ -46,6 +46,8 @@ function contains(value, strings) {
 function isJavaInstalled() {
   var env = toUpperCase(process.env);
 
+  debugPrint(env);
+
   var javaHomeEnv = env[JAVA_HOME];
   var classpathEnv = env[CLASSPATH];
   var pathEnv = env[PATH];
@@ -55,7 +57,27 @@ function isJavaInstalled() {
         || contains(javaHomeEnv, [ pathEnv, classpathEnv ]);
   }
 
+  if (typeof pathEnv !== "undefined") {
+    var splitChar = windows ? ';' : ':';
+    var paths = pathEnv.split(splitChar);
+
+    for (var i = 0; i < paths.length; ++i) {
+      var currentPath = paths[i];
+      var javaCheck = currentPath + "/java";
+      console.log("Checking: %s", javaCheck);
+      if (fs.existsSync(javaCheck)) {
+        return true;
+      }
+    }
+  }
+
   return false;
+}
+
+function debugPrint(map) {
+  for(var key in map) {
+    console.log("key: %s, value: %s", key, map[key]);
+  }
 }
 
 // For windows directories. Converts "C:\Foo\" -> "C:\Foo"
@@ -111,7 +133,7 @@ function handleOutput(error, stdout, stderr) {
   }
 }
 
-if (windows && !isJavaInstalled()) {
+if (!isJavaInstalled()) {
   console.error("Java runtime could not be found. Please ensure JAVA_HOME is set and on your path.");
   return;
 }
