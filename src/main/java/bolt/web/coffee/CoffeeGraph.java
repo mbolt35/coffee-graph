@@ -26,14 +26,13 @@
 package bolt.web.coffee;
 
 import bolt.web.coffee.command.CoffeeGraphCommand;
+import bolt.web.coffee.command.CoffeeGraphCommandParser;
 import bolt.web.coffee.command.FileConverterFactory;
 import bolt.web.coffee.dependency.graph.CyclicDependencyException;
 import bolt.web.coffee.exceptions.ChainedExportException;
 import bolt.web.coffee.exceptions.NoValidCoffeeFilesException;
 import bolt.web.coffee.exceptions.RequiredBuilderComponentException;
-import bolt.web.coffee.io.CoffeeScriptLexer;
-import bolt.web.coffee.io.CoffeeScriptMinParser;
-import bolt.web.coffee.io.Exporter;
+import bolt.web.coffee.io.*;
 import bolt.web.coffee.io.exporters.ChainedExporter;
 import bolt.web.coffee.io.exporters.CoffeeScriptCompileExporter;
 import bolt.web.coffee.io.exporters.DependencyTreeExporter;
@@ -50,50 +49,35 @@ import com.beust.jcommander.ParameterException;
 public class CoffeeGraph implements Runnable {
 
     public static void main(String[] arguments) {
-        CoffeeGraph coffeeGraph = new CoffeeGraph(arguments);
+        CoffeeGraph coffeeGraph = new CoffeeGraph(new CoffeeGraphCommandParser(arguments));
         coffeeGraph.run();
     }
 
-    private static String getVersionInfo() {
+    public static String getVersionInfo() {
         return "[CoffeeGraph v" + CoffeeGraphVersion.Version + "]\n" +
                " +- Running: CoffeeScript v" + new CoffeeScript().getVersion() + "\n" +
                " +- Using: Java v" + System.getProperty("java.version") +
                     " from " + System.getProperty("java.vendor");
     }
 
-    private final String[] arguments;
+    private final CoffeeGraphOptionsParser optionsParser;
 
-    private final JCommander commander;
-    private final CoffeeGraphCommand command;
+    public CoffeeGraph(CoffeeGraphOptionsParser optionsParser) {
+        this.optionsParser = optionsParser;
 
-    private StringBuilder usageString;
 
-    public CoffeeGraph(String[] arguments) {
-        this.arguments = arguments;
-
-        command = new CoffeeGraphCommand();
-        commander = new JCommander(command);
-        commander.setProgramName("coffee-graph");
-        commander.setColumnSize(100);
-        commander.addConverterFactory(new FileConverterFactory());
     }
 
     @Override
     public void run() {
-        try {
-            commander.parse(arguments);
-        }
-        catch (ParameterException e) {
-            usage();
+        CoffeeGraphOptions options = optionsParser.parse();
+
+        if (options.isHelp()) {
+            optionsParser.usage();
             return;
         }
 
-        if (command.help) {
-            usage();
-            return;
-        }
-
-        if (command.version) {
+        if (options.isVersion()) {
             System.out.println(getVersionInfo());
             return;
         }
@@ -102,8 +86,8 @@ public class CoffeeGraph implements Runnable {
             new CoffeeScriptDependencyBuilder()
                 .withTokensFrom(new CoffeeScriptLexer())
                 .parsedWith(new CoffeeScriptMinParser())
-                .exportedBy(getExporter())
-                .build(command.files);
+                .exportedBy(getExporter(options))
+                .build(options.getSourceFiles());
         }
         catch (RequiredBuilderComponentException e) {
             // This is more of a developer error -- maybe be nice to have in ant/maven plugin dev or extensions
@@ -125,51 +109,27 @@ public class CoffeeGraph implements Runnable {
     /**
      * Chain the exporters together if more than one is used.
      */
-    private Exporter getExporter() {
+    private Exporter getExporter(CoffeeGraphOptions options) {
         ChainedExporter exporter = new ChainedExporter();
 
-        if (command.print) {
+        if (options.isPrint()) {
             exporter.addExporter(new ListFilesExporter(false));
         }
 
-        if (command.println) {
+        if (options.isPrintLine()) {
             exporter.addExporter(new ListFilesExporter(true));
         }
 
-        if (command.tree) {
+        if (options.isPrintTree()) {
             exporter.addExporter(new DependencyTreeExporter());
         }
 
-        if (command.compile) {
-            exporter.addExporter(new CoffeeScriptCompileExporter(command.outputFile, command.bare));
+        if (options.isCompile()) {
+            exporter.addExporter(new CoffeeScriptCompileExporter(options.getOutputFile(), options.isBare()));
         }
 
         return exporter;
     }
 
-    /**
-     * Attempted to hide the default boolean fields by using a custom annotation and default provider with JCommander,
-     * but wasn't able to. This is kind of gross, but does the job.
-     */
-    private void usage() {
-        if (null != usageString) {
-            System.out.println(usageString.toString());
-            return;
-        }
 
-        final String defaultText = "Default: false";
-        final int len = defaultText.length();
-
-        usageString = new StringBuilder();
-        commander.usage(usageString);
-
-        int index = usageString.indexOf(defaultText);
-        while (index != -1) {
-            usageString.replace(index, index + len, "");
-
-            index = usageString.indexOf(defaultText);
-        }
-
-        System.out.println(usageString.toString());
-    }
 }

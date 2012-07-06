@@ -1,13 +1,62 @@
 #!/usr/bin/env node
 
-// TODO: Since we require Java 6 here, we should add checks the runtime.
-// TODO: It's also possible that java doesn't exist on their path, in which
-// TODO: case, we'd need to attempt to find it.
+// Environment Variables to Check
+var JAVA_HOME = "JAVA_HOME";
+var CLASSPATH = "CLASSPATH";
+var PATH = "PATH";
 
+// Check for Windows OS for lame pathing issues
 var windows = require('os').type().toLowerCase().indexOf("windows") != -1;
+
+// Node Modules for Executing Coffee-Graph
 var exec = require('child_process').exec;
 var path  = require('path');
 var fs = require('fs');
+
+
+// Converts all keys in the map to upper case as part of a new mapping and 
+// returns it.
+function toUpperCase(map) {
+  var ucase = { };
+
+  for (var key in map) {
+    ucase[key.toUpperCase()] = map[key];
+  }
+
+  return ucase;
+}
+
+// Returns true if at least one of the strings contains the value.
+function contains(value, strings) {
+  for (var i = 0; i < strings.length; ++i) {
+    var str = strings[i];
+    if (typeof str === "undefined") {
+      continue;
+    }
+
+    if (str.indexOf(value) != -1) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+// A very general java runtime check
+function isJavaInstalled() {
+  var env = toUpperCase(process.env);
+
+  var javaHomeEnv = env[JAVA_HOME];
+  var classpathEnv = env[CLASSPATH];
+  var pathEnv = env[PATH];
+
+  if (typeof javaHomeEnv !== "undefined") {
+    return contains(JAVA_HOME, [ pathEnv, classpathEnv ]) 
+        || contains(javaHomeEnv, [ pathEnv, classpathEnv ]);
+  }
+
+  return false;
+}
 
 // For windows directories. Converts "C:\Foo\" -> "C:\Foo"
 function trim(file) {
@@ -54,15 +103,20 @@ function processArguments(args) {
 // Execution callback
 function handleOutput(error, stdout, stderr) {
   if (error) {
-    console.log(error);
+    console.error(error);
   } else if (stdout) {
     console.log(stdout);
   } else if (stderr) {
-    console.log(stderr);
+    console.error(stderr);
   }
+}
+
+if (windows && !isJavaInstalled()) {
+  console.error("Java runtime could not be found. Please ensure JAVA_HOME is set and on your path.");
+  return;
 }
 
 var args = processArguments(process.argv).join(' ');
 var jar = wrap( path.join(realDir(__filename), 'jar', '/coffee-graph.jar') );
 
-exec('java -jar ' + jar + ' ' + args, handleOutput);
+exec("java -jar " + jar + " " + args, handleOutput);
