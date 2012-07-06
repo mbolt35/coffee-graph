@@ -35,5 +35,5 @@ Thumbs.db
 # Project Files #
 #################
 .idea/
-
+target/
 coffee-graph.iml

@@ -7,7 +7,7 @@
 
     <groupId>bolt.web</groupId>
     <artifactId>coffee-graph</artifactId>
-    <version>0.0.8</version>
+    <version>0.1.0</version>
     <packaging>jar</packaging>
 
     <properties>
