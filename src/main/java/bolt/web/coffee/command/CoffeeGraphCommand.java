@@ -50,8 +50,11 @@ public final class CoffeeGraphCommand {
     @Parameter(names = {"--tree", "-t"}, description = "Prints a dependency tree.")
     public boolean tree = false;
 
-    @Parameter(names = {"--compile", "-c"}, description = "Performs an ordered file join and compilation to CoffeeScript")
+    @Parameter(names = {"--compile", "-c"}, description = "Performs an ordered file join and compilation to JavaScript")
     public boolean compile = false;
+
+    @Parameter(names = {"--bare", "-b"}, description = "Compiles the CoffeeScript source without a security wrapper.")
+    public boolean bare = false;
 
     @Parameter(names = {"-o" }, description = "The file to output the dependency graph to.")
     public File outputFile = new File("lib/coffee-graph.js");

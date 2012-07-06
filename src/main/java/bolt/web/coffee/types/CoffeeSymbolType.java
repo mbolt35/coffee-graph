@@ -44,6 +44,8 @@ public enum CoffeeSymbolType implements CoffeeType {
     This("this"),
     Document("document"),
     Window("window"),
+    Exports("exports"),
+    New("new"),
     Dot("."),
     Colon(":"),
     Lambda("->"),

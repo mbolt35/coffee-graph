@@ -48,6 +48,8 @@ public class CoffeeScope {
     private final Map<CoffeeToken, CoffeeScope> scopeIdentifiers = new HashMap<CoffeeToken, CoffeeScope>();
     private final Map<CoffeeType, List<CoffeeToken>> byType = new HashMap<CoffeeType, List<CoffeeToken>>();
 
+    private final Set<String> assignments = new HashSet<String>();
+
     CoffeeScope() {
         this(ROOT, 0);
     }
@@ -64,6 +66,18 @@ public class CoffeeScope {
 
         byType.get(token.getType()).add(token);
         tokens.add(token);
+    }
+
+    public void addAssignment(CoffeeToken token) {
+        if (assignments.contains(token.getValue())) {
+            return;
+        }
+
+        assignments.add(token.getValue());
+    }
+
+    public boolean hasAssignment(CoffeeToken token) {
+        return assignments.contains(token.getValue());
     }
 
     public void add(CoffeeScope scope) {

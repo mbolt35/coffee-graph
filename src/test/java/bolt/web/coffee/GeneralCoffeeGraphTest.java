@@ -56,8 +56,8 @@ public class GeneralCoffeeGraphTest extends BaseTestCase {
             .exportedBy(new AssertingExporter(new AssertExportOrder() {
                 @Override
                 public void assertOrder(List<CoffeeIdentifier> identifiers) throws Exception {
-                    assertEquals(identifiers.get(0).getFile().getName(), "Foo.coffee");
-                    assertEquals(identifiers.get(1).getFile().getName(), "Bar.coffee");
+                assertEquals(identifiers.get(0).getFile().getName(), "Foo.coffee");
+                assertEquals(identifiers.get(1).getFile().getName(), "Bar.coffee");
                 }
             }))
             .build(files);
@@ -73,9 +73,9 @@ public class GeneralCoffeeGraphTest extends BaseTestCase {
             .exportedBy(new AssertingExporter(new AssertExportOrder() {
                 @Override
                 public void assertOrder(List<CoffeeIdentifier> identifiers) throws Exception {
-                    List<String> fileNames = toFileNames(identifiers);
+                List<String> fileNames = toFileNames(identifiers);
 
-                    assertTrue( fileNames.indexOf("Roo.coffee") < fileNames.indexOf("Bar.coffee") );
+                assertTrue( fileNames.indexOf("Roo.coffee") < fileNames.indexOf("Bar.coffee") );
                 }
             }))
             .build(files);
@@ -113,13 +113,60 @@ public class GeneralCoffeeGraphTest extends BaseTestCase {
             .exportedBy(new AssertingExporter(new AssertExportOrder() {
                 @Override
                 public void assertOrder(List<CoffeeIdentifier> identifiers) throws Exception {
+                List<String> fileNames = toFileNames(identifiers);
+
+                int aIndex = fileNames.indexOf("A.coffee");
+                int bIndex = fileNames.indexOf("B.coffee");
+                int cIndex = fileNames.indexOf("C.coffee");
+
+                assertTrue( bIndex < aIndex && bIndex < cIndex );
+                }
+            }))
+            .build(files);
+    }
+
+    @Test
+    public void reassignThisTest() throws Exception {
+        List<File> files = Collections.singletonList(classPathFile("/reassign"));
+
+        buildDependencies()
+            .withTokensFrom(new CoffeeScriptLexer())
+            .parsedWith(new CoffeeScriptMinParser())
+            .exportedBy(new AssertingExporter(new AssertExportOrder() {
+                @Override
+                public void assertOrder(List<CoffeeIdentifier> identifiers) throws Exception {
                     List<String> fileNames = toFileNames(identifiers);
 
-                    int aIndex = fileNames.indexOf("A.coffee");
-                    int bIndex = fileNames.indexOf("B.coffee");
-                    int cIndex = fileNames.indexOf("C.coffee");
+                    for (String fileName : fileNames) {
+                        System.out.println("File: " + fileName);
+                    }
 
-                    assertTrue( bIndex < aIndex && bIndex < cIndex );
+                    assertEquals(fileNames.get(0), "Foo.coffee");
+                    assertEquals(fileNames.get(1), "Bar.coffee");
+                    assertEquals(fileNames.get(2), "Woo.coffee");
+                }
+            }, true))
+            .build(files);
+    }
+
+    @Test
+    public void windowTest() throws Exception {
+        List<File> files = Collections.singletonList(classPathFile("/window"));
+
+        buildDependencies()
+            .withTokensFrom(new CoffeeScriptLexer())
+            .parsedWith(new CoffeeScriptMinParser())
+            .exportedBy(new AssertingExporter(new AssertExportOrder() {
+                @Override
+                public void assertOrder(List<CoffeeIdentifier> identifiers) throws Exception {
+                    List<String> fileNames = toFileNames(identifiers);
+
+                    for (String fileName : fileNames) {
+                        System.out.println(fileName);
+                    }
+
+                    assertEquals(fileNames.get(0), "B.coffee");
+                    assertEquals(fileNames.get(1), "A.coffee");
                 }
             }))
             .build(files);

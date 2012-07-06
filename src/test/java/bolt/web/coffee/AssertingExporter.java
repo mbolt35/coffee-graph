@@ -40,15 +40,26 @@ import java.util.List;
  */
 public class AssertingExporter extends AbstractExporter {
     private final AssertExportOrder assertOrder;
+    private final boolean printTree;
 
     public AssertingExporter(AssertExportOrder assertOrder) {
+        this(assertOrder, false);
+    }
+
+    public AssertingExporter(AssertExportOrder assertOrder, boolean printTree) {
         this.assertOrder = assertOrder;
+        this.printTree = printTree;
     }
 
     @Override
     public void export(DependencyGraph<CoffeeIdentifier> graph) {
         List<CoffeeIdentifier> identifiers;
+
         try {
+            if (printTree) {
+                GraphUtils.printDependencies(graph);
+            }
+
             identifiers = GraphUtils.topologicalSort(graph);
         }
         catch (CyclicDependencyException e) {

@@ -22,7 +22,9 @@ Check installation:
 
     Usage: coffee-graph [options] file.coffee ... [directory]
     Options:
-        --compile, -c    Performs an ordered file join and compilation to CoffeeScript
+        --bare, -b       Compiles the CoffeeScript source without a security wrapper
+        
+        --compile, -c    Performs an ordered file join and compilation to JavaScript
                          
         --help, -h       Show the coffee-graph command line usage.
                          
@@ -45,7 +47,7 @@ You can always bring up the usage options with:
 ## Coffee-Graph Demo
 Let's say I have a directory `src` that contains three `.coffee` source files:
 
-**src/A.coffee**
+`src/A.coffee`
 
     class @A
       constructor: (@name) ->
@@ -53,7 +55,7 @@ Let's say I have a directory `src` that contains three `.coffee` source files:
       doSomething: -> 
         helloWorld "Dookie McGee", 51
 
-**src/B.coffee**
+`src/B.coffee`
 
     class @B
       constructor: (@name) ->
@@ -61,7 +63,7 @@ Let's say I have a directory `src` that contains three `.coffee` source files:
     this.helloWorld = (name, age) -> 
         console.log "Hello World! My name is #{name} and I am #{age} years old."
 
-**src/C.coffee**
+`src/C.coffee`
 
     class AnotherBlah
       constructor: ->
@@ -85,7 +87,6 @@ Let's say I have a directory `src` that contains three `.coffee` source files:
     b.doIt()
 
 Using Coffee-Graph, we can generate the correct file ordering for successful execution in a browser.
-
 
 ### Print
 
@@ -160,7 +161,7 @@ The contents of the `output.js` file are:
     })();
 
     this.helloWorld = function(name, age) {
-      return alert("Hello World! My name is " + name + " and I am " + age + " years old.");
+      return console.log("Hello World! My name is " + name + " and I am " + age + " years old.");
     };
 
 
@@ -257,18 +258,61 @@ You can also chain command line options together:
     Compiling: C.coffee
     Coffee-Script compiled successfully.
 
-### Usage Notes
+## Usage Notes, Future Updates, and Limitations
 
-Concerning the embedded CoffeeScript compiler, and how the files are joined:
-* Coffee-Graph is currently compiling each `.coffee` file one at a time and concatenating the result.
-** Note: I seem to vaguely recall reading that the `.coffee` files should be concatenated prior to compilation. Can anyone confirm?
+### Future Updates
 
 Concerning the embedded CoffeeScript compiler, there are a few improvements we can make here:
 * Build a node.js module which can retrieve the file listing to be plugged into a cake build.
 * Allow the CoffeeScript compiler JS to be passed in as a URL.
 
+
+### Limitations
+
+Coffee-Graph isn't perfect, and there will be CoffeeScript syntax that may cause unexpected output. Additionally, the current version of Coffee-Graph bases dependencies on objects attached to the `this` or `@` object in each file scope. 
+
+Initially, this limitation was a concern due to the `exports` / `require` module pattern used in node.js. However, consider the following example:
+
+`Foo.coffee`:
+    
+    root = exports ? this
+    
+    root.Foo = class Foo 
+        constructor: ->
+        
+        getName: -> "Foo"
+        
+`Bar.coffee`:
+    
+    Foo = require('./Foo').Foo
+    
+    f = new Foo()
+    console.log f.getName()
+    
+    
+In this example, CoffeeGraph will not recognize that it should attach the `this` semantics to `root`, and `Foo` will not be treated as "global." Fortunately, in `Bar.coffee`, `Foo` is defined as `require './Foo'`, so the ordering is irrelevant. In short, if your code uses `exports` and `require` properly, then you most likely won't need Coffee-Graph to link dependencies. 
+
+Based on what I've described in the above example, consider the following:
+
+`Foo.coffee`
+
+    root = this
+    
+    root.Foo = class Foo 
+        constructor: ->
+        
+        getName: -> "Foo"
+        
+`Bar.coffee`
+    
+    f = new Foo()
+    console.log f.getName()
+    
+The above example used to be a limitation, but as of now, a variable assigned to `this`, `@`, or `window` will inherit the dependency link rules. This solution will most likely not cover all aspects of the CoffeeScript syntax, but hopefully it will provide better support for applications targetting browser and node.js.
+
+
 ## How It Works
-Coffee-Graph was built in Java 6 and uses Mozilla's Rhino javascript engine to wrap the [CoffeeScript compiler](https://github.com/jashkenas/coffee-script/blob/master/extras/coffee-script.js). Each `.coffee` source file that is passed to the application is passed through the CoffeeScript.tokens() method. The tokens are then added to a pseudo Abstract Syntax Tree (AST), where each level of scope is generated based on `INDENT` and `OUTDENT` tokens. Parsing each file will also generate it's own file-level scope in the tree. 
+Coffee-Graph was built in Java 6 and uses Mozilla's Rhino javascript engine to wrap the [CoffeeScript compiler](https://github.com/jashkenas/coffee-script/blob/master/extras/coffee-script.js). Each `.coffee` source file that is passed to the application is passed through the `CoffeeScript.tokens()` method. The tokens are then added to a pseudo Abstract Syntax Tree (AST), where each level of scope is generated based on `INDENT` and `OUTDENT` tokens. Parsing each file will also generate it's own file-level scope in the tree. 
 
 Using this `CoffeeTree` instance, we can search for globally defined identifiers (using `@`,`this`, or `window`) as well as outgoing and incoming edges between those identifiers. Using this information, Coffee-Graph builds a dependency graph using the outgoing/incoming edges relating the identifiers. 
 
@@ -280,6 +324,7 @@ The popularity of CoffeeScript has caught the eye of a lot of full-stack develop
 
 The basic concept of Coffee-Graph is this:
 > Organize CoffeeScript sources like you would a Java or C# project, in separate folder structures or packages, without worrying about how you're going to reach the compiled product.
+
 
 ## The Story
 Full-stack developers have conventions that are difficult to get away from, especially those who fancy C# and/or Java. These conventions are like breathing to us, and when experimenting with new languages, we tend to carry over those conventions as sort of a security blanket. 
@@ -312,6 +357,9 @@ To install from source:
 
     $ npm install -g .
 
+
+## Bug Reporting
+Please create tickets in the GitHub Issue tracker as you run into them, and I will do my best to address them as soon as possible. 
 
 
 ## About Me

@@ -28,6 +28,9 @@ package bolt.web.coffee.dependency.graph;
 import java.util.*;
 
 /**
+ * This data structure is used to track generic nodes and an optional relationships between them, defined by an
+ * {@link Edge} instance.
+ *
  * @author Matt Bolt
  */
 public class DependencyGraph<T> {
