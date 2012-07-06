@@ -121,7 +121,7 @@ exports.JavaHelper = (function() {
   }
 
   /**
-   * This "static" method determines if the java runtime executable exists
+   * This method determines if the java runtime executable exists
    * on the user's path or not. 
    */
   JavaHelper.isJavaAvailable = function() {
