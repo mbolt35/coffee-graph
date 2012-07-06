@@ -25,21 +25,13 @@
 
 package bolt.web.coffee;
 
-import bolt.web.coffee.command.CoffeeGraphCommand;
 import bolt.web.coffee.command.CoffeeGraphCommandParser;
-import bolt.web.coffee.command.FileConverterFactory;
 import bolt.web.coffee.dependency.graph.CyclicDependencyException;
 import bolt.web.coffee.exceptions.ChainedExportException;
 import bolt.web.coffee.exceptions.NoValidCoffeeFilesException;
 import bolt.web.coffee.exceptions.RequiredBuilderComponentException;
 import bolt.web.coffee.io.*;
-import bolt.web.coffee.io.exporters.ChainedExporter;
-import bolt.web.coffee.io.exporters.CoffeeScriptCompileExporter;
-import bolt.web.coffee.io.exporters.DependencyTreeExporter;
-import bolt.web.coffee.io.exporters.ListFilesExporter;
 import bolt.web.coffee.util.CoffeeScript;
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.ParameterException;
 
 /**
  * This is the main class for the coffee-graph project.
@@ -49,7 +41,11 @@ import com.beust.jcommander.ParameterException;
 public class CoffeeGraph implements Runnable {
 
     public static void main(String[] arguments) {
-        CoffeeGraph coffeeGraph = new CoffeeGraph(new CoffeeGraphCommandParser(arguments));
+        // Use default implementations if this class is used as main
+        CoffeeGraphOptionsParser parser = new CoffeeGraphCommandParser(arguments);
+        ExporterFactory exporters = new DefaultExporterFactory();
+
+        CoffeeGraph coffeeGraph = new CoffeeGraph(parser, exporters);
         coffeeGraph.run();
     }
 
@@ -61,18 +57,18 @@ public class CoffeeGraph implements Runnable {
     }
 
     private final CoffeeGraphOptionsParser optionsParser;
+    private final ExporterFactory exporters;
 
-    public CoffeeGraph(CoffeeGraphOptionsParser optionsParser) {
+    public CoffeeGraph(CoffeeGraphOptionsParser optionsParser, ExporterFactory exporters) {
         this.optionsParser = optionsParser;
-
-
+        this.exporters = exporters;
     }
 
     @Override
     public void run() {
         CoffeeGraphOptions options = optionsParser.parse();
 
-        if (options.isHelp()) {
+        if (null == options || options.isHelp()) {
             optionsParser.usage();
             return;
         }
@@ -86,7 +82,7 @@ public class CoffeeGraph implements Runnable {
             new CoffeeScriptDependencyBuilder()
                 .withTokensFrom(new CoffeeScriptLexer())
                 .parsedWith(new CoffeeScriptMinParser())
-                .exportedBy(getExporter(options))
+                .exportedBy(exporters.exporterFor(options))
                 .build(options.getSourceFiles());
         }
         catch (RequiredBuilderComponentException e) {
@@ -105,31 +101,5 @@ public class CoffeeGraph implements Runnable {
             System.out.println("[CoffeeGraph Error: " + e.getMessage() + "]");
         }
     }
-
-    /**
-     * Chain the exporters together if more than one is used.
-     */
-    private Exporter getExporter(CoffeeGraphOptions options) {
-        ChainedExporter exporter = new ChainedExporter();
-
-        if (options.isPrint()) {
-            exporter.addExporter(new ListFilesExporter(false));
-        }
-
-        if (options.isPrintLine()) {
-            exporter.addExporter(new ListFilesExporter(true));
-        }
-
-        if (options.isPrintTree()) {
-            exporter.addExporter(new DependencyTreeExporter());
-        }
-
-        if (options.isCompile()) {
-            exporter.addExporter(new CoffeeScriptCompileExporter(options.getOutputFile(), options.isBare()));
-        }
-
-        return exporter;
-    }
-
 
 }

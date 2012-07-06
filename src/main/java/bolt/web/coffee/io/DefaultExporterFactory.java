@@ -25,20 +25,43 @@
 
 package bolt.web.coffee.io;
 
+import bolt.web.coffee.io.exporters.ChainedExporter;
+import bolt.web.coffee.io.exporters.CoffeeScriptCompileExporter;
+import bolt.web.coffee.io.exporters.DependencyTreeExporter;
+import bolt.web.coffee.io.exporters.ListFilesExporter;
+
 /**
- * The implementation prototype for an object that generates {@link Exporter} instances.
- *
+ * The default {@link ExporterFactory} implementation, which chains Coffee-Graph usage options together.
+ * 
  * @author Matt Bolt
  */
-public interface ExporterFactory {
+public class DefaultExporterFactory implements ExporterFactory {
 
-    /**
-     * This method returns the appropriate {@link Exporter} implementation for the {@link CoffeeGraphOptions} instance.
-     *
-     * @param options The {@link CoffeeGraphOptions} implementation used to determine the exporter to return.
-     *
-     * @return An {@link Exporter} implementation based on the {@link CoffeeGraphOptions} instance provided.
-     */
-    Exporter exporterFor(CoffeeGraphOptions options);
+    public DefaultExporterFactory() {
+
+    }
+
+    @Override
+    public Exporter exporterFor(CoffeeGraphOptions options) {
+        ChainedExporter exporter = new ChainedExporter();
+
+        if (options.isPrint()) {
+            exporter.addExporter(new ListFilesExporter(false));
+        }
+
+        if (options.isPrintLine()) {
+            exporter.addExporter(new ListFilesExporter(true));
+        }
+
+        if (options.isPrintTree()) {
+            exporter.addExporter(new DependencyTreeExporter());
+        }
+
+        if (options.isCompile()) {
+            exporter.addExporter(new CoffeeScriptCompileExporter(options.getOutputFile(), options.isBare()));
+        }
+
+        return exporter;
+    }
 
 }
