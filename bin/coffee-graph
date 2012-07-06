@@ -1,144 +1,28 @@
 #!/usr/bin/env node
 
-// Environment Variables to Check
-var JAVA_HOME = "JAVA_HOME";
-var CLASSPATH = "CLASSPATH";
-var PATH = "PATH";
-
-// Check for Windows OS for lame pathing issues
-var windows = require('os').type().toLowerCase().indexOf("windows") != -1;
-
-// Node Modules for Executing Coffee-Graph
-var exec = require('child_process').exec;
-var path  = require('path');
-var fs = require('fs');
-
-
-// Converts all keys in the map to upper case as part of a new mapping and 
-// returns it.
-function toUpperCase(map) {
-  var ucase = { };
-
-  for (var key in map) {
-    ucase[key.toUpperCase()] = map[key];
-  }
-
-  return ucase;
-}
-
-// Returns true if at least one of the strings contains the value.
-function contains(value, strings) {
-  for (var i = 0; i < strings.length; ++i) {
-    var str = strings[i];
-    if (typeof str === "undefined") {
-      continue;
-    }
-
-    if (str.indexOf(value) != -1) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-// A very general java runtime check
-function isJavaInstalled() {
-  var env = toUpperCase(process.env);
-
-  debugPrint(env);
-
-  var javaHomeEnv = env[JAVA_HOME];
-  var classpathEnv = env[CLASSPATH];
-  var pathEnv = env[PATH];
-
-  if (typeof javaHomeEnv !== "undefined") {
-    return contains(JAVA_HOME, [ pathEnv, classpathEnv ]) 
-        || contains(javaHomeEnv, [ pathEnv, classpathEnv ]);
-  }
-
-  if (typeof pathEnv !== "undefined") {
-    var splitChar = windows ? ';' : ':';
-    var paths = pathEnv.split(splitChar);
-
-    for (var i = 0; i < paths.length; ++i) {
-      var currentPath = paths[i];
-      var javaCheck = currentPath + "/java";
-      console.log("Checking: %s", javaCheck);
-      if (fs.existsSync(javaCheck)) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
-function debugPrint(map) {
-  for(var key in map) {
-    console.log("key: %s, value: %s", key, map[key]);
-  }
-}
-
-// For windows directories. Converts "C:\Foo\" -> "C:\Foo"
-function trim(file) {
-  if (file.indexOf('"') != -1) {
-    return file.replace('"', '');
-  }
-  
-  return file;
-}
-
-// Wraps the String in Quotations
-function wrap(file) {
-  return '"' + file + '"';
-}
-
-// Uses the fs and path modules to determine the real directory name
-function realDir(file) {
-  return path.dirname(fs.realpathSync(file));
-}
-
-// Determine if the argument is an option
-function isOption(arg) {
-  return arg.charAt(0) === "-";
-}
+// Class Imports
+var JavaHelper = require('./lib/java-helper').JavaHelper;
+var PathHelper = require('./lib/path-helper').PathHelper; 
 
 // Fix-up any potential windows file system madness.
-function processArguments(args) {
-  var result = args.slice(2);
-  if (!windows) {
-    return result;
-  }
-  
-  for (var i = 0; i < result.length; ++i) {
-    result[i] = trim(result[i]);
-    
-    if (!isOption(result[i])) {
-      result[i] = wrap(result[i]);
-    }
-  }
-  
-  return result;
+function getArguments() {
+  return PathHelper.trimAndWrap( 
+    process.argv.slice(2), 
+
+    // Filter options
+    function(arg) {
+      return arg.charAt(0) === '-';
+    });
 }
 
-// Execution callback
-function handleOutput(error, stdout, stderr) {
-  if (error) {
-    console.error(error);
-  } else if (stdout) {
-    console.log(stdout);
-  } else if (stderr) {
-    console.error(stderr);
-  }
-}
-
-if (!isJavaInstalled()) {
+// Check for Java runtime
+if (!JavaHelper.isJavaAvailable()) {
   console.error("Java runtime could not be found. Please ensure JAVA_HOME is set and on your path.");
   return;
 }
 
-var args = processArguments(process.argv).join(' ');
-var jar = wrap( path.join(realDir(__filename), 'jar', '/coffee-graph.jar') );
+var relativeDirectory = PathHelper.realDir(__filename);
+var jar = PathHelper.joinAndWrap([ relativeDirectory, 'jar', '/coffee-graph.jar' ]);
 
-exec("java -jar " + jar + " " + args, handleOutput);
+// Execute jar
+JavaHelper.executeJar(jar, getArguments());
