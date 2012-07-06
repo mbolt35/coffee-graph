@@ -89,7 +89,7 @@ public class CoffeeScriptDependencyBuilder {
         // 2. Build CoffeeScript Tree
         CoffeeTree tree = coffeeParser.parse(coffeeLexer, files);
 
-        // 3. Generate Dependency Graph, Execute a Topological Sort
+        // 3. Generate Dependency Graph
         DependencyGraph<CoffeeIdentifier> graph = dependencies.generateGraph(tree);
 
         // 4. Export
