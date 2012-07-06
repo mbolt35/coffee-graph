@@ -25,6 +25,7 @@
 
 package bolt.web.coffee.command;
 
+import bolt.web.coffee.io.CoffeeGraphOptions;
 import com.beust.jcommander.Parameter;
 
 import java.io.File;
@@ -36,34 +37,34 @@ import java.util.List;
  *
  * @author Matt Bolt
  */
-public final class CoffeeGraphCommand {
+public final class CoffeeGraphCommand implements CoffeeGraphOptions {
 
     @Parameter(description = "file.coffee ... [directory]")
-    public List<File> files = new ArrayList<File>();
+    private List<File> files = new ArrayList<File>();
 
     @Parameter(names = {"--print", "-p"}, description = "Prints the ordered .coffee files on a single line.")
-    public boolean print = false;
+    private boolean print = false;
 
     @Parameter(names = {"--println", "-pl"}, description = "Prints the ordered .coffee files, one per line.")
-    public boolean println = false;
+    private boolean println = false;
 
     @Parameter(names = {"--tree", "-t"}, description = "Prints a dependency tree.")
-    public boolean tree = false;
+    private boolean tree = false;
 
     @Parameter(names = {"--compile", "-c"}, description = "Performs an ordered file join and compilation to JavaScript")
-    public boolean compile = false;
+    private boolean compile = false;
 
     @Parameter(names = {"--bare", "-b"}, description = "Compiles the CoffeeScript source without a security wrapper.")
-    public boolean bare = false;
+    private boolean bare = false;
 
     @Parameter(names = {"-o" }, description = "The file to output the dependency graph to.")
-    public File outputFile = new File("lib/coffee-graph.js");
+    private File outputFile = new File("lib/coffee-graph.js");
 
     @Parameter(names = {"--help", "-h"}, description = "Show the coffee-graph command line usage.")
-    public boolean help = false;
+    private boolean help = false;
 
     @Parameter(names = {"--version", "-v"}, description = "Displays the current version of coffee-graph.")
-    public boolean version = false;
+    private boolean version = false;
 
     public CoffeeGraphCommand() {
 
@@ -81,4 +82,48 @@ public final class CoffeeGraphCommand {
             .append("]").toString();
     }
 
+    @Override
+    public boolean isPrint() {
+        return print;
+    }
+
+    @Override
+    public boolean isPrintLine() {
+        return println;
+    }
+
+    @Override
+    public boolean isPrintTree() {
+        return tree;
+    }
+
+    @Override
+    public boolean isHelp() {
+        return help;
+    }
+
+    @Override
+    public boolean isVersion() {
+        return version;
+    }
+
+    @Override
+    public boolean isCompile() {
+        return compile;
+    }
+
+    @Override
+    public boolean isBare() {
+        return bare;
+    }
+
+    @Override
+    public List<File> getSourceFiles() {
+        return files;
+    }
+
+    @Override
+    public File getOutputFile() {
+        return outputFile;
+    }
 }
