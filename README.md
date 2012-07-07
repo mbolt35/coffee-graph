@@ -13,7 +13,7 @@ Installation of binaries via npm:
 Check installation:
 
     $ coffee-graph -v
-    [CoffeeGraph v0.0.6]
+    [CoffeeGraph v0.1.0]
      +- Running: CoffeeScript v1.3.3
      +- Using: Java v1.6.0_33 from Apple Inc.
 
