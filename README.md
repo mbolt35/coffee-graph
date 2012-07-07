@@ -147,7 +147,7 @@ The following will output a single `output.js` file containing the ordered compi
     
 The contents of the `output.js` file are:
 
-    // [Dependencies Linked with CoffeeGraph v0.0.6]
+    // [Dependencies Linked with CoffeeGraph v0.1.0]
     // [Compiled with CoffeeScript v1.3.3]
 
     this.B = (function() {
@@ -308,7 +308,7 @@ Based on what I've described in the above example, consider the following:
     f = new Foo()
     console.log f.getName()
     
-The above example used to be a limitation, but as of now, a variable assigned to `this`, `@`, or `window` will inherit the dependency link rules. This solution will most likely not cover all aspects of the CoffeeScript syntax, but hopefully it will provide better support for applications targetting browser and node.js.
+As of version `0.0.8`, a variable assigned to `this`, `@`, or `window` will inherit the dependency link rules. This solution will most likely not cover all aspects of the CoffeeScript syntax, but hopefully it will provide better support for applications targetting browser and node.js.
 
 
 ## How It Works
