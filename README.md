@@ -338,6 +338,10 @@ I needed these external concerns to go away, so I started to build a maven plugi
 The original find/replace algorithm turned into an attempt to reproduce the CoffeeScript grammar in `javacc`. I had some success, but ultimately, my grammar was only 90% accurate when parsing the CoffeeScript unit tests. After this approach, I looked into [JCoffeeScript](https://github.com/yeungda/jcoffeescript), which executes the JS CoffeeScript compiler using [Rhino](http://www.mozilla.org/rhino/). Obviously, this was a much more maintainable approach, and the rest is history.
 
 
+## JavaDocs
+You can find the latest version of the code documentation here: [Coffee-Graph JavaDocs](http://mbolt35.github.com/coffee-graph/)
+
+
 ## Building/Running the Source
 Coffee-Graph uses [Maven](http://maven.apache.org/) to compile and package the binaries. 
 
