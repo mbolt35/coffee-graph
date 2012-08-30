@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/mbolt35/coffee-graph.png)](http://travis-ci.org/mbolt35/coffee-graph)
      )   ___                        _____)                
     (__/_____)    /) /)           /                    /) 
       /       ___// //  _   _    /   ___   __  _  __  (/  
