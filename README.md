@@ -1,4 +1,3 @@
-[![build status](https://secure.travis-ci.org/mbolt35/coffee-graph.png)](http://travis-ci.org/mbolt35/coffee-graph)
      )   ___                        _____)                
     (__/_____)    /) /)           /                    /) 
       /       ___// //  _   _    /   ___   __  _  __  (/  
@@ -7,6 +6,9 @@
               (/ (/                           (_/
 
 Coffee-Graph is an automated build tool for CoffeeScript, which is able to analyze large multi-file projects and output an **ordered** listing of the files using cross-file dependencies (if they exist). Coffee-Graph does not require the use of any external JS libraries like RequireJS; just plain vanilla CoffeeScript.
+
+## Build Status
+[![build status](https://secure.travis-ci.org/mbolt35/coffee-graph.png)](http://travis-ci.org/mbolt35/coffee-graph)
 
 
 ## Installation
