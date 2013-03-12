@@ -1,6 +1,14 @@
-# Coffee-Graph
+     )   ___                        _____)                
+    (__/_____)    /) /)           /                    /) 
+      /       ___// //  _   _    /   ___   __  _  __  (/  
+     /       (_)/(_/(__(/__(/_  /     / ) / (_(_(_/_)_/ )_
+    (______)   /) /)           (____ /         .-/        
+              (/ (/                           (_/
 
 Coffee-Graph is an automated build tool for CoffeeScript, which is able to analyze large multi-file projects and output an **ordered** listing of the files using cross-file dependencies (if they exist). Coffee-Graph does not require the use of any external JS libraries like RequireJS; just plain vanilla CoffeeScript.
+
+## Build Status
+[![build status](https://secure.travis-ci.org/mbolt35/coffee-graph.png)](http://travis-ci.org/mbolt35/coffee-graph)
 
 
 ## Installation
@@ -13,7 +21,7 @@ Installation of binaries via npm:
 Check installation:
 
     $ coffee-graph -v
-    [CoffeeGraph v0.0.6]
+    [CoffeeGraph v0.1.0]
      +- Running: CoffeeScript v1.3.3
      +- Using: Java v1.6.0_33 from Apple Inc.
 
@@ -147,7 +155,7 @@ The following will output a single `output.js` file containing the ordered compi
     
 The contents of the `output.js` file are:
 
-    // [Dependencies Linked with CoffeeGraph v0.0.6]
+    // [Dependencies Linked with CoffeeGraph v0.1.0]
     // [Compiled with CoffeeScript v1.3.3]
 
     this.B = (function() {
@@ -308,7 +316,7 @@ Based on what I've described in the above example, consider the following:
     f = new Foo()
     console.log f.getName()
     
-The above example used to be a limitation, but as of now, a variable assigned to `this`, `@`, or `window` will inherit the dependency link rules. This solution will most likely not cover all aspects of the CoffeeScript syntax, but hopefully it will provide better support for applications targetting browser and node.js.
+As of version `0.0.8`, a variable assigned to `this`, `@`, or `window` will inherit the dependency link rules. This solution will most likely not cover all aspects of the CoffeeScript syntax, but hopefully it will provide better support for applications targetting browser and node.js.
 
 
 ## How It Works
@@ -336,6 +344,10 @@ In May 2012, I started my first CoffeeScript project, and noticed I was focusing
 I needed these external concerns to go away, so I started to build a maven plugin that did some quick find/replace in the source files to order them. The quick and dirty solution didn't hold up too long, and it was clear I needed a much more intelligent approach for finding dependencies between files. And what better way to learn a language than to dive right into the compiler. 
 
 The original find/replace algorithm turned into an attempt to reproduce the CoffeeScript grammar in `javacc`. I had some success, but ultimately, my grammar was only 90% accurate when parsing the CoffeeScript unit tests. After this approach, I looked into [JCoffeeScript](https://github.com/yeungda/jcoffeescript), which executes the JS CoffeeScript compiler using [Rhino](http://www.mozilla.org/rhino/). Obviously, this was a much more maintainable approach, and the rest is history.
+
+
+## JavaDocs
+You can find the latest version of the code documentation here: [Coffee-Graph JavaDocs](http://mbolt35.github.com/coffee-graph/)
 
 
 ## Building/Running the Source
