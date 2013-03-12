@@ -26,6 +26,7 @@
 package bolt.web.coffee.tree;
 
 import bolt.web.coffee.io.CoffeeToken;
+import bolt.web.coffee.types.CoffeeScriptLine;
 import bolt.web.coffee.types.CoffeeTokenType;
 import bolt.web.coffee.types.CoffeeType;
 
@@ -39,7 +40,7 @@ import java.util.*;
  */
 public class CoffeeScope {
 
-    private static final CoffeeToken ROOT = new CoffeeToken(CoffeeTokenType.Identifier, "ROOT", 0);
+    private static final CoffeeToken ROOT = new CoffeeToken(CoffeeTokenType.Identifier, "ROOT", CoffeeScriptLine.Zero);
 
     private final CoffeeToken identifier;
     private final int depth;
@@ -48,6 +49,7 @@ public class CoffeeScope {
     private final Map<CoffeeToken, CoffeeScope> scopeIdentifiers = new HashMap<CoffeeToken, CoffeeScope>();
     private final Map<CoffeeType, List<CoffeeToken>> byType = new HashMap<CoffeeType, List<CoffeeToken>>();
 
+    // Tracks re-assignment of variables
     private final Set<String> assignments = new HashSet<String>();
 
     CoffeeScope() {
@@ -116,7 +118,7 @@ public class CoffeeScope {
         int index = tokens.indexOf(token);
         int offset = index + amount;
 
-        // null return for invalid range or not existent token for scope
+        // null return for invalid range or non-existent token for scope
         if (offset < 0 || offset >= tokens.size()) {
             return null;
         }

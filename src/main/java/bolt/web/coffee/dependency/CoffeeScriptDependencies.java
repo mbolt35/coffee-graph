@@ -127,13 +127,16 @@ public class CoffeeScriptDependencies {
      * @return A list of the identifier references found in the existing and inner scopes.
      */
     private Set<DependencyReference<CoffeeIdentifier>> findReferencesIn(CoffeeScope scope) {
-        return findReferencesIn(scope, new HashSet<String>());
+        List<CoffeeScope> scopes = scope.getScopes();
+        scopes.add(0, scope);
+
+        return findReferencesIn(scopes, new HashSet<String>());
     }
 
     /**
      * Recursively search each inner-scope for references to identifiers outside of the current scope.
      *
-     * @param scope The {@code CoffeeScope} instance to search.
+     * @param scopes A {@code List} of {@code CoffeeScope} instances to search.
      *
      * @param overrides If any of the global identifiers are overridden in a different scope, we need to ensure that any
      * identifiers within that scope do not create a dependency with the global identifier. We collect "overrides" as we
@@ -142,38 +145,17 @@ public class CoffeeScriptDependencies {
      *
      * @return A list of the identifier references found in the existing and inner scopes.
      */
-    private Set<DependencyReference<CoffeeIdentifier>> findReferencesIn(CoffeeScope scope, Set<String> overrides) {
+    private Set<DependencyReference<CoffeeIdentifier>> findReferencesIn(List<CoffeeScope> scopes, Set<String> overrides) {
         Set<DependencyReference<CoffeeIdentifier>> references = new HashSet<DependencyReference<CoffeeIdentifier>>();
-        Set<String> localOverrides = new HashSet<String>(overrides);
-
-        // Check local scope
-        for (CoffeeToken token : scope.tokensFor(CoffeeTokenType.Identifier)) {
-            // Check the current scope override identifiers to see if this token fails
-            if (localOverrides.contains(token.getValue())) {
-                continue;
-            }
-
-            // Check for a global identifier with the same name -- ensure that this identifier is to be ignored
-            // throughout the scope of this token.
-            if (dependencies.canResolve(token.getValue()) && isAssigned(scope, token)) {
-                localOverrides.add(token.getValue());
-                continue;
-            }
-
-            // If we determine that the identifier reference is legitimate, add a dependency reference
-            if (isValidReference(scope, token)) {
-                references.add(reference.to(token.getValue()));
-            }
-        }
 
         // Recursively search each inner scope
-        for (CoffeeScope innerScope : scope.getScopes()) {
+        for (CoffeeScope innerScope : scopes) {
             List<CoffeeToken> tokens = innerScope.tokensFor(CoffeeTokenType.Identifier);
             Set<String> innerOverrides = new HashSet<String>();
 
             for (CoffeeToken token : tokens) {
                 // Check the current scope override identifiers to see if this token fails
-                if (localOverrides.contains(token.getValue()) || innerOverrides.contains(token.getValue())) {
+                if (innerOverrides.contains(token.getValue())) {
                     continue;
                 }
 
@@ -191,8 +173,8 @@ public class CoffeeScriptDependencies {
             }
 
             // Pass existing overrides with the inner overrides found in this scope, and recurse
-            innerOverrides.addAll(localOverrides);
-            references.addAll( findReferencesIn(innerScope, innerOverrides) );
+            innerOverrides.addAll(overrides);
+            references.addAll( findReferencesIn(innerScope.getScopes(), innerOverrides) );
         }
 
         return references;

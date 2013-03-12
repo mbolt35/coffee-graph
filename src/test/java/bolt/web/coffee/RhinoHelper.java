@@ -68,6 +68,9 @@ public final class RhinoHelper {
             || object instanceof Integer
             || object instanceof Float
             || object instanceof Double
-            || object instanceof Boolean;
+            || object instanceof Boolean
+            || object instanceof Long
+            || object instanceof Byte
+            || object instanceof Character;
     }
 }

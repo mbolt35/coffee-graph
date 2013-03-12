@@ -25,6 +25,7 @@
 
 package bolt.web.coffee.io;
 
+import bolt.web.coffee.types.CoffeeScriptLine;
 import bolt.web.coffee.types.CoffeeTokenType;
 import bolt.web.coffee.types.CoffeeType;
 
@@ -43,13 +44,13 @@ public class CoffeeToken {
     private final int id;
     private final CoffeeType type;
     private final String value;
-    private final int lineNumber;
+    private final CoffeeScriptLine lineNumber;
 
     public CoffeeToken(CoffeeType type, String value) {
-        this(type, value, 0);
+        this(type, value, CoffeeScriptLine.Zero);
     }
 
-    public CoffeeToken(CoffeeType type, String value, int lineNumber) {
+    public CoffeeToken(CoffeeType type, String value, CoffeeScriptLine lineNumber) {
         this.id = idCount.incrementAndGet();
         this.type = type;
         this.value = value;
@@ -64,7 +65,7 @@ public class CoffeeToken {
         CoffeeToken that = (CoffeeToken) o;
 
         if (id != that.id) return false;
-        if (lineNumber != that.lineNumber) return false;
+        if (!lineNumber.equals(that.lineNumber)) return false;
         if (!type.equals(that.type)) return false;
         if (!value.equals(that.value)) return false;
 
@@ -76,7 +77,7 @@ public class CoffeeToken {
         int result = id;
         result = 31 * result + type.hashCode();
         result = 31 * result + value.hashCode();
-        result = 31 * result + lineNumber;
+        result = 31 * result + lineNumber.hashCode();
         return result;
     }
 
@@ -97,7 +98,7 @@ public class CoffeeToken {
         return value;
     }
 
-    public int getLineNumber() {
+    public CoffeeScriptLine getLineNumber() {
         return lineNumber;
     }
 

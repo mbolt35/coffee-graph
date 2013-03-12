@@ -54,7 +54,6 @@ public abstract class AbstractExporter implements Exporter {
 
             try {
                 file = identifier.getFile().getCanonicalPath();
-                //System.out.println("FILE: " + file);
             }
             catch (IOException e) {
                 // TODO: Throw an appropriate exception here?

@@ -56,8 +56,8 @@ public class GeneralCoffeeGraphTest extends BaseTestCase {
             .exportedBy(new AssertingExporter(new AssertExportOrder() {
                 @Override
                 public void assertOrder(List<CoffeeIdentifier> identifiers) throws Exception {
-                assertEquals(identifiers.get(0).getFile().getName(), "Foo.coffee");
-                assertEquals(identifiers.get(1).getFile().getName(), "Bar.coffee");
+                    assertEquals(identifiers.get(0).getFile().getName(), "Foo.coffee");
+                    assertEquals(identifiers.get(1).getFile().getName(), "Bar.coffee");
                 }
             }))
             .build(files);
@@ -73,9 +73,9 @@ public class GeneralCoffeeGraphTest extends BaseTestCase {
             .exportedBy(new AssertingExporter(new AssertExportOrder() {
                 @Override
                 public void assertOrder(List<CoffeeIdentifier> identifiers) throws Exception {
-                List<String> fileNames = toFileNames(identifiers);
+                    List<String> fileNames = toFileNames(identifiers);
 
-                assertTrue( fileNames.indexOf("Roo.coffee") < fileNames.indexOf("Bar.coffee") );
+                    assertTrue( fileNames.indexOf("Roo.coffee") < fileNames.indexOf("Bar.coffee") );
                 }
             }))
             .build(files);
@@ -113,13 +113,13 @@ public class GeneralCoffeeGraphTest extends BaseTestCase {
             .exportedBy(new AssertingExporter(new AssertExportOrder() {
                 @Override
                 public void assertOrder(List<CoffeeIdentifier> identifiers) throws Exception {
-                List<String> fileNames = toFileNames(identifiers);
+                    List<String> fileNames = toFileNames(identifiers);
 
-                int aIndex = fileNames.indexOf("A.coffee");
-                int bIndex = fileNames.indexOf("B.coffee");
-                int cIndex = fileNames.indexOf("C.coffee");
+                    int aIndex = fileNames.indexOf("A.coffee");
+                    int bIndex = fileNames.indexOf("B.coffee");
+                    int cIndex = fileNames.indexOf("C.coffee");
 
-                assertTrue( bIndex < aIndex && bIndex < cIndex );
+                    assertTrue( bIndex < aIndex && bIndex < cIndex );
                 }
             }))
             .build(files);
@@ -142,8 +142,9 @@ public class GeneralCoffeeGraphTest extends BaseTestCase {
                     }
 
                     assertEquals(fileNames.get(0), "Foo.coffee");
-                    assertEquals(fileNames.get(1), "Bar.coffee");
-                    assertEquals(fileNames.get(2), "Woo.coffee");
+                    assertEquals(fileNames.get(1), "Hoo.coffee");
+                    assertEquals(fileNames.get(2), "Bar.coffee");
+                    assertEquals(fileNames.get(3), "Woo.coffee");
                 }
             }, true))
             .build(files);

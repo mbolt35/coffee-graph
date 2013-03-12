@@ -25,11 +25,13 @@
 
 package bolt.web.coffee.io;
 
+import bolt.web.coffee.types.CoffeeScriptLine;
 import bolt.web.coffee.types.CoffeeScriptType;
 import bolt.web.coffee.types.CoffeeType;
 import bolt.web.coffee.types.UndefinedCoffeeType;
 import bolt.web.coffee.util.CoffeeScript;
 import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.NativeObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -81,12 +83,12 @@ public class CoffeeScriptLexer implements Lexer {
 
         Object next = tokenEntries.size() > 1 ? tokenEntries.get(1) : "";
 
-        if (next instanceof Double) {
-            return new CoffeeToken(type, type.getType(), ((Double) next).intValue());
+        if (CoffeeScriptLine.isLine(next)) {
+            return new CoffeeToken(type, type.getType(), CoffeeScriptLine.parseLine(next));
         }
 
-        Double lineNum = (Double) (tokenEntries.size() > 2 ? tokenEntries.get(2) : 0.0);
+        NativeObject obj = tokenEntries.size() > 2 ? (NativeObject) tokenEntries.get(2) : null;
 
-        return new CoffeeToken(type, next.toString(), lineNum.intValue());
+        return new CoffeeToken(type, next.toString(), CoffeeScriptLine.parseLine(obj));
     }
 }
