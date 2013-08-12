@@ -379,7 +379,7 @@ Name: Matt Bolt<br/>
 Email: mbolt35@gmail.com<br/>
 Twitter: mbolt35<br/>
 Web: [mattbolt.blogspot.com](http://mattbolt.blogspot.com)<br/>
-Occupation: Lead Game Developer at Electrotank<br/>
+Occupation: Lead Game Developer at High 5 Games<br/>
 Education: B.S. in Computer Science, Clemson University<br/>
 
 
