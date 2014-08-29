@@ -141,7 +141,7 @@ Using the `--tree` or `-t` command will output a tree-like structure. This tree 
 
 ### CoffeeScript Compilation
 
-Using the `--compile` or `-c` command along with the `-o` (output) command will forward the ordered files directly to the CoffeeScript compiler. Currently, Coffee-Graph uses an embedded CoffeeScript compiler (`v1.3.3`). 
+Using the `--compile` or `-c` command along with the `-o` (output) command will forward the ordered files directly to the CoffeeScript compiler. Currently, Coffee-Graph uses an embedded CoffeeScript compiler (`v1.6.1`). 
 
 The following will output a single `output.js` file containing the ordered compiled `.coffee` files in the `src` directory:
 
